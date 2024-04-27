@@ -14,9 +14,7 @@ class Cube
 public:
 
 	bool rotate = false;
-
 	float rotValue = 0;
-	
 	Cube(float vertex[], int count = 108)
 	{
 		float v[108];
