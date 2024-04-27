@@ -6,7 +6,13 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 enum keys {
-	ROTATE = 0
+	ROTATE = 0,
+	COLOR =1
+};
+enum colors {
+	RED =0,
+	YELLOW = 2,
+	GREEN = 3,
 };
 
 class Cube
@@ -22,6 +28,7 @@ public:
 		{
 			v[i] = vertex[i];
 		}
+	
 		
 		unsigned int vBuffer;
 		glGenBuffers(1, &vBuffer);
@@ -48,6 +55,18 @@ public:
 			rotValue = 1;
 		}
 	}
+	void Enable(keys key, colors color)
+	{
+		if (key == COLOR)
+		{
+			//do something
+			
+		}
+		else {
+			return;
+		}
+	}
+	
 
 
 private:
