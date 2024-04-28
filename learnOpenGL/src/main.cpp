@@ -66,7 +66,7 @@ int main()
 
 	Cube cube(cube_vertex);
 
-	Model model("P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\backpack.obj");
+	Model model("P:/Projects/VS/learnOpenGL/learnOpenGL/backpack.obj");
 
 
 	
@@ -75,6 +75,7 @@ int main()
 		glClearColor(0.2, 0.5, 0.3, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		glEnable(GL_DEPTH_TEST);
 		cubeShader.use();
 
 		glm::mat4 modelMatrix = 1.0f;
@@ -82,7 +83,7 @@ int main()
 		glm::mat4 projMatrix = 1.0f;
 
 		modelMatrix = glm::rotate(modelMatrix, glm::radians(35.0f * (float)glfwGetTime() ), glm::vec3(1.0f, 1.0f, 1.0f));
-		modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5, .5, 0.5));
+		//modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5, .5, 0.5));
 		viewMatrix = glm::translate(viewMatrix, glm::vec3(0, 0, -.020f));
 		projMatrix = glm::perspective(glm::radians(45.0f), 500 / 300.0f, 0.1f, 1000.0f);
 
