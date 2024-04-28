@@ -42,7 +42,7 @@ private:
             std::cout << "ERROR::ASSIMP::" << import.GetErrorString() << std::endl;
             return;
         }
-        directory = path.substr(0, path.find_last_of("//"));
+        directory = path.substr(0, path.find_last_of("/"));
         processNode(scene->mRootNode, scene);
 
     }
@@ -95,15 +95,15 @@ private:
                 vec.y = mesh->mTextureCoords[0][i].y;
                 vertex.TextureCoords = vec;
                 // tangent
-                vector.x = mesh->mTangents[i].x;
-                vector.y = mesh->mTangents[i].y;
-                vector.z = mesh->mTangents[i].z;
-                vertex.Tangent = vector;
+          //      vector.x = mesh->mTangents[i].x;
+            //   vector.y = mesh->mTangents[i].y;
+              // vector.z = mesh->mTangents[i].z;
+               //vertex.Tangent = vector;
                 // bitangent
-                vector.x = mesh->mBitangents[i].x;
-                vector.y = mesh->mBitangents[i].y;
-                vector.z = mesh->mBitangents[i].z;
-                vertex.Bitangent = vector;
+                //vector.x = mesh->mBitangents[i].x;
+             //   vector.y = mesh->mBitangents[i].y;
+          //      vector.z = mesh->mBitangents[i].z;
+            //    vertex.Bitangent = vector;
             }
             else
                 vertex.TextureCoords = glm::vec2(0.0f, 0.0f);
@@ -133,7 +133,7 @@ private:
         std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
         textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
-        // return a mesh object created from the extracted mesh data
+        // return a mesh object created from the extracted mesh data*/
         return Mesh(vertices, indices, textures);
     }
 

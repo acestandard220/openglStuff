@@ -66,7 +66,7 @@ int main()
 
 	Cube cube(cube_vertex);
 
-	Model model("P:\\Archive\\3DModels\\OBJModels\\lamborghiniurus2019.obj");
+	Model model("P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\backpack.obj");
 
 
 	
@@ -82,14 +82,15 @@ int main()
 		glm::mat4 projMatrix = 1.0f;
 
 		modelMatrix = glm::rotate(modelMatrix, glm::radians(35.0f * (float)glfwGetTime() ), glm::vec3(1.0f, 1.0f, 1.0f));
-		viewMatrix = glm::translate(viewMatrix, glm::vec3(0, 0, -3.0f));
+		modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5, .5, 0.5));
+		viewMatrix = glm::translate(viewMatrix, glm::vec3(0, 0, -.020f));
 		projMatrix = glm::perspective(glm::radians(45.0f), 500 / 300.0f, 0.1f, 1000.0f);
 
 		cubeShader.setUniformMatrix(*"model", modelMatrix);
 		cubeShader.setUniformMatrix(*"view", viewMatrix);
 		cubeShader.setUniformMatrix(*"proj", projMatrix);
 			
-		//model.Draw(cubeShader);
+		model.Draw(cubeShader);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
