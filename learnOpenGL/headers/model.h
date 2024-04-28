@@ -11,12 +11,28 @@
 #include <assimp/postprocess.h>
 #include <stb_image.h>
 
+
+
 class Model {
 public:
+    int texLoad = 0;
     std::vector<Texture> textures_loaded;
     Model(std::string path)
     {
-        loadModel(path);
+        if (loadModel(path))
+        {
+            std::cout << "Model Load Successful.\n";
+            
+            
+            for (int i = 0; i < meshes.size(); i++)
+            {
+                Mesh mesher = meshes[i];
+            }
+        }
+        else {
+            std::cout << "Model loading unsuccessfull\n";
+        }
+
     }
 
     void Draw(Shader& shader)
@@ -32,7 +48,7 @@ private:
     std::vector<Mesh> meshes;
     std::string directory;
 
-    void loadModel(std::string path)
+    bool loadModel(std::string path)
     {
         Assimp::Importer import;
         const aiScene * scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
@@ -40,14 +56,24 @@ private:
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
         {
             std::cout << "ERROR::ASSIMP::" << import.GetErrorString() << std::endl;
-            return;
+            return false;
         }
         directory = path.substr(0, path.find_last_of("/"));
-        processNode(scene->mRootNode, scene);
+        std::cout <<"Directory value is " << directory<<"\n";
+
+        if (processNode(scene->mRootNode, scene))
+        {
+            std::cout << "All nodes have been processed.\n";
+        }
+        else
+        {
+            std::cout << "All nodes could not be processed\n";
+        }
+        return true;
 
     }
 
-    void processNode(aiNode* node, const aiScene* scene)
+    bool processNode(aiNode* node, const aiScene* scene)
     {
         for (int i = 0; i < node->mNumMeshes; i++)
         {
@@ -58,6 +84,7 @@ private:
         {
             processNode(node->mChildren[i], scene);
         }
+        return true;
     }
 
     Mesh processMesh(aiMesh* mesh, const aiScene* scene)
@@ -77,6 +104,7 @@ private:
             vector.y = mesh->mVertices[i].y;
             vector.z = mesh->mVertices[i].z;
             vertex.Position = vector;
+            
             // normals
             if (mesh->HasNormals())
             {
@@ -135,6 +163,11 @@ private:
         // 4. height maps
         std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
         textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+        
+        std::cout << textures.size() << "\n";
+        texLoad += 1;
+        std::cout << "[TEXTURE LOADING]: " << texLoad << " loaded out of 79" << "\n";
+        
 
         // return a mesh object created from the extracted mesh data*/
         return Mesh(vertices, indices, textures);
@@ -145,8 +178,9 @@ private:
 
 	std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)
 	{
-        std::vector<Texture> textures;
-        for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
+        std::vector<Texture> text;
+        unsigned int k = mat->GetTextureCount(type);
+        for (unsigned int i = 0; i <k; i++)
         {
             aiString str;
             mat->GetTexture(type, i, &str);
@@ -155,7 +189,7 @@ private:
             {
                 if (std::strcmp(textures_loaded[j].path.data(), str.C_Str()) == 0)
                 {
-                    textures.push_back(textures_loaded[j]);
+                    text.push_back(textures_loaded[j]);
                     skip = true; // a texture with the same filepath has already been loaded, continue to next one. (optimization)
                     break;
                 }
@@ -166,11 +200,11 @@ private:
                 texture.ID = TextureFromFile(str.C_Str(), this->directory);
                 texture.type = typeName;
                 texture.type = str.C_Str();
-                textures.push_back(texture);
+                text.push_back(texture);
                 textures_loaded.push_back(texture);  // store it as texture loaded for entire model, to ensure we won't unnecessary load duplicate textures.
             }
         }
-        return textures;
+        return text;
 	}
 
     unsigned int TextureFromFile(const char* path, const std::string& directory)
