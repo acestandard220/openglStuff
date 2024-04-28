@@ -19,7 +19,6 @@ class Cube
 {
 public:
 
-	glm::mat4 viewMatrix = 1.0f;
 	bool rotate = false;
 	float rotValue = 0;
 	Cube(float vertex[], int count = 108)
@@ -41,10 +40,10 @@ public:
 
 	}
 
-	void Draw(Shader& shader)
+	void Draw(Shader& shader,glm::vec3 camPos,glm::vec3 camFront,glm::vec3 camUp)
 	{
 		shader.use();
-		transMatrix(shader);
+		transMatrix(shader, camPos,camFront,camUp);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		
 	}
@@ -67,18 +66,18 @@ public:
 			return;
 		}
 	}
-	
 
 
 private:
 	
-	void transMatrix(Shader& shader)
+	void transMatrix(Shader& shader, glm::vec3 camPos, glm::vec3 camFront, glm::vec3 camUp)
 	{
 		glm::mat4 modelMatrix = 1.0f;
 		glm::mat4 projMatrix = 1.0f;
+		glm::mat4 viewMatrix(1.0f);
 
-		modelMatrix = glm::rotate(modelMatrix, glm::radians(35.0f * (float)glfwGetTime() *rotValue), glm::vec3(1.0f, 1.0f, 1.0f));
-		//viewMatrix = glm::translate(viewMatrix, glm::vec3(0, 0, 1.0f));
+		modelMatrix = glm::rotate(modelMatrix, glm::radians(45.0f * (float)glfwGetTime() *rotValue), glm::vec3(1.0f, 1.0f, 1.0f));
+		viewMatrix = glm::lookAt(camPos, camPos + camFront, camUp);
 		projMatrix = glm::perspective(glm::radians(45.0f), 500 / 300.0f, 0.1f, 1000.0f);
 		
 		shader.setUniformMatrix(*"model", modelMatrix);

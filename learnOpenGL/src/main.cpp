@@ -4,11 +4,10 @@
 #include <headers/cubeRender.h>
 #include <stb_image.h>
 #include <headers/model.h>
+#include <headers/paths.h>
 
-
-
-float lastX = 800 / 2.0f;
-float lastY = 600 / 2.0f;
+float lastX = 1000 / 2.0f;
+float lastY = 800 / 2.0f;
 bool firstMouse = true;
 
 float deltaTime = 0.0f;	
@@ -25,19 +24,22 @@ void processInput(GLFWwindow* window);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 
-
-
 int main()
 {
 	if (!glfwInit())
 		return -1;
 
-	GLFWwindow* window = glfwCreateWindow(800, 600, "amish", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(1000, 800, "amish", NULL, NULL);
 	glfwMakeContextCurrent(window);
 
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glewInit();
 
+	//stbi_set_flip_vertically_on_load(true);
+
 	Shader cubeShader("P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\cube_VertexShader.shader", "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\cube_FragmentShader.shader");
+	//	
+	 glEnable(GL_DEPTH_TEST);
 
 	float cube_vertex[] = {
 			-0.5f, -0.5f, -0.5f,
@@ -87,13 +89,15 @@ int main()
 	glfwSetCursorPosCallback(window, mouse_callback);
 	processInput(window);
 
-	Model model("P:/Projects/VS/learnOpenGL/learnOpenGL/backpack/backpack.obj");
-
+	Cube cube(cube_vertex);
+	Model model(SCANI);
 
 	while (!glfwWindowShouldClose(window))
 	{
-		glClearColor(0.2, 0.5, 0.3, 1.0);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClearColor(0.5, 0.5, 0.5, 1.0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		processInput(window);
 
 		glm::mat4 modelMatrix(1.0f);
 		glm::mat4 viewMatrix(1.0f);
@@ -101,15 +105,21 @@ int main()
 
 		cubeShader.use();
 
-		modelMatrix = glm::translate(modelMatrix, glm::vec3(1.0,1.0,4.0));
+		//modelMatrix = glm::rotate(modelMatrix,glm::radians(45.0f), glm::vec3(1.0, 1.0f, 1.0f));
+		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0,0.0,0.0));
+		modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0, 1.0, 1.0f));
 		viewMatrix = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-		projMatrix = glm::perspective(glm::radians(45.0f), (float)800.0f / (float)600, 0.1f, 100.0f);
+		projMatrix = glm::perspective(glm::radians(45.0f), (float)1000.0f / (float)800, 0.1f, 10000.0f);
 
 		cubeShader.setUniformMatrix(*"model", modelMatrix);
 		cubeShader.setUniformMatrix(*"view", viewMatrix);
 		cubeShader.setUniformMatrix(*"proj", projMatrix);
 
 		model.Draw(cubeShader);
+
+		//cube.Enable(ROTATE);
+		//cube.Draw(cubeShader,cameraPos,cameraFront,cameraUp);
+		
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -118,10 +128,9 @@ int main()
 	return 0;
 }
 
-
 void processInput(GLFWwindow* window)
 {
-	const float cameraSpeed = 1.5f;
+	const float cameraSpeed = 0.005f;
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		cameraPos += cameraSpeed * cameraFront;
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)

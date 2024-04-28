@@ -166,7 +166,7 @@ private:
         
         std::cout << textures.size() << "\n";
         texLoad += 1;
-        std::cout << "[TEXTURE LOADING]: " << texLoad << " loaded out of 79" << "\n";
+        std::cout << "[TEXTURE LOADING]: " << texLoad << scene->mNumMaterials<< "\n";
         
 
         // return a mesh object created from the extracted mesh data*/
