@@ -19,6 +19,7 @@ class Cube
 {
 public:
 
+	glm::mat4 viewMatrix = 1.0f;
 	bool rotate = false;
 	float rotValue = 0;
 	Cube(float vertex[], int count = 108)
@@ -74,11 +75,10 @@ private:
 	void transMatrix(Shader& shader)
 	{
 		glm::mat4 modelMatrix = 1.0f;
-		glm::mat4 viewMatrix = 1.0f;
 		glm::mat4 projMatrix = 1.0f;
 
 		modelMatrix = glm::rotate(modelMatrix, glm::radians(35.0f * (float)glfwGetTime() *rotValue), glm::vec3(1.0f, 1.0f, 1.0f));
-		viewMatrix = glm::translate(viewMatrix, glm::vec3(0, 0, -3.0f));
+		//viewMatrix = glm::translate(viewMatrix, glm::vec3(0, 0, 1.0f));
 		projMatrix = glm::perspective(glm::radians(45.0f), 500 / 300.0f, 0.1f, 1000.0f);
 		
 		shader.setUniformMatrix(*"model", modelMatrix);
