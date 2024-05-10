@@ -14,6 +14,7 @@ public:
 	unsigned int ID;
 	std::string vertexCode;
 	std::string fragmentCode;
+	Shader(){}
 	Shader(const char* vertexPath, const char* fragmentPath)
 	{
 		std::ifstream vShade;
@@ -43,8 +44,8 @@ public:
 		fragment = glCreateShader(GL_FRAGMENT_SHADER);
 		glShaderSource(fragment, 1, &fragmentShader, NULL);
 		glCompileShader(fragment);
-		checkShaderError(vertex, "ROGRAM");
-		checkShaderError(fragment, "");
+		checkShaderError(vertex, "VERTEX");
+		checkShaderError(fragment, "FRAGMENT");
 
 		ID = glCreateProgram();
 		glAttachShader(ID, vertex);

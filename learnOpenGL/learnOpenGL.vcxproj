@@ -141,6 +141,7 @@
     <ClInclude Include="headers\mesh.h" />
     <ClInclude Include="headers\model.h" />
     <ClInclude Include="headers\paths.h" />
+    <ClInclude Include="headers\platform.h" />
     <ClInclude Include="headers\Shader.h" />
     <ClInclude Include="stb_image.h" />
   </ItemGroup>
@@ -148,6 +149,8 @@
     <None Include="assimp-vc140-mt.dll" />
     <None Include="Shaders\cube_FragmentShader.shader" />
     <None Include="Shaders\cube_VertexShader.shader" />
+    <None Include="Shaders\platform_FragmentShader.shader" />
+    <None Include="Shaders\platform_VertexShader.shader" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 #include <headers/Shader.h>
 #include <headers/cubeRender.h>
+#include <headers/platform.h>
 #include <stb_image.h>
 #include <headers/model.h>
 #include <headers/paths.h>
@@ -38,74 +39,31 @@ int main()
 	//stbi_set_flip_vertically_on_load(true);
 
 	Shader cubeShader("P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\cube_VertexShader.shader", "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\cube_FragmentShader.shader");
-	//	
+	Shader platformShader("P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\platform_VertexShader.shader", "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\platform_FragmentShader.shader");
+
 	 glEnable(GL_DEPTH_TEST);
+	
+	Platform* ground = new Platform;
 
-	float cube_vertex[] = {
-			-0.5f, -0.5f, -0.5f,
-			 0.5f, -0.5f, -0.5f,
-			 0.5f,  0.5f, -0.5f,
-			 0.5f,  0.5f, -0.5f,
-			-0.5f,  0.5f, -0.5f,
-			-0.5f, -0.5f, -0.5f,
-
-			-0.5f, -0.5f,  0.5f,
-			 0.5f, -0.5f,  0.5f,
-			 0.5f,  0.5f,  0.5f,
-			 0.5f,  0.5f,  0.5f,
-			-0.5f,  0.5f,  0.5f,
-			-0.5f, -0.5f,  0.5f,
-
-			-0.5f,  0.5f,  0.5f,
-			-0.5f,  0.5f, -0.5f,
-			-0.5f, -0.5f, -0.5f,
-			-0.5f, -0.5f, -0.5f,
-			-0.5f, -0.5f,  0.5f,
-			-0.5f,  0.5f,  0.5f,
-
-			 0.5f,  0.5f,  0.5f,
-			 0.5f,  0.5f, -0.5f,
-			 0.5f, -0.5f, -0.5f,
-			 0.5f, -0.5f, -0.5f,
-			 0.5f, -0.5f,  0.5f,
-			 0.5f,  0.5f,  0.5f,
-
-			-0.5f, -0.5f, -0.5f,
-			 0.5f, -0.5f, -0.5f,
-			 0.5f, -0.5f,  0.5f,
-			 0.5f, -0.5f,  0.5f,
-			-0.5f, -0.5f,  0.5f,
-			-0.5f, -0.5f, -0.5f,
-
-			-0.5f,  0.5f, -0.5f,
-			 0.5f,  0.5f, -0.5f,
-			 0.5f,  0.5f,  0.5f,
-			 0.5f,  0.5f,  0.5f,
-			-0.5f,  0.5f,  0.5f,
-			-0.5f,  0.5f, -0.5f
-	};
+	Cube cube;
 
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
 	processInput(window);
 
-	Cube cube(cube_vertex);
-	Model model(SCANI);
-
 	while (!glfwWindowShouldClose(window))
 	{
 		glClearColor(0.5, 0.5, 0.5, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+		
 		processInput(window);
 
+		/*
 		glm::mat4 modelMatrix(1.0f);
 		glm::mat4 viewMatrix(1.0f);
 		glm::mat4 projMatrix(1.0);
 
-		cubeShader.use();
-
-		//modelMatrix = glm::rotate(modelMatrix,glm::radians(45.0f), glm::vec3(1.0, 1.0f, 1.0f));
+		cmodelMatrix = glm::rotate(modelMatrix,glm::radians(45.0f), glm::vec3(1.0, 1.0f, 1.0f));
 		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0,0.0,0.0));
 		modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0, 1.0, 1.0f));
 		viewMatrix = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
@@ -114,12 +72,12 @@ int main()
 		cubeShader.setUniformMatrix(*"model", modelMatrix);
 		cubeShader.setUniformMatrix(*"view", viewMatrix);
 		cubeShader.setUniformMatrix(*"proj", projMatrix);
-
-		model.Draw(cubeShader);
-
-		//cube.Enable(ROTATE);
-		//cube.Draw(cubeShader,cameraPos,cameraFront,cameraUp);
+		*/
 		
+		cube.Draw(cubeShader,cameraPos,cameraFront,cameraUp);
+	
+		ground->draw(platformShader, cameraPos, cameraFront, cameraUp);
+
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
