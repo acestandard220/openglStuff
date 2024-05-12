@@ -148,8 +148,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="assimp-vc140-mt.dll" />
-    <None Include="Shaders\cube_FragmentShader.shader" />
-    <None Include="Shaders\cube_VertexShader.shader" />
+    <None Include="Shaders\model_FragmentShader.shader" />
+    <None Include="Shaders\model_VertexShader.shader" />
     <None Include="Shaders\outline_fragment.shader" />
     <None Include="Shaders\outline_Vertex.shader" />
     <None Include="Shaders\platform_FragmentShader.shader" />

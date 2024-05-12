@@ -8,6 +8,11 @@
 #include <headers/paths.h>
 #include <headers/ripOFF.h>
 
+
+/// <TODO>
+///  Add Textures for the Ground plane.
+/// </TODO>
+
 float lastX = 1000 / 2.0f;
 float lastY = 800 / 2.0f;
 bool firstMouse = true;
@@ -48,8 +53,9 @@ int main()
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_STENCIL_TEST); 
 	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE); 
+	glStencilMask(0xFF);
 
-	Cube cube(glm::vec3(0.0f,0.0f,1.0f));
+	Cube cube(WORN_PLANKS);
 	CubeR scaledCube(glm::vec3(1.0));
 
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
@@ -81,15 +87,15 @@ int main()
 
 		glStencilFunc(GL_ALWAYS, 1, 0xFF);
 		glStencilMask(0xFF);
-		cube.Draw(cubeShader, cameraPos, cameraFront, cameraUp);	
+		cube.Draw(cubeShader, cameraPos, cameraFront, cameraUp);
 
 		glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
 		glStencilMask(0x00);
 		glDisable(GL_DEPTH_TEST);
-		scaledCube.Draw(scaledShader, cameraPos, cameraFront,cameraUp);
+		scaledCube.Draw(scaledShader, cameraPos, cameraFront, cameraUp);
 
-		glStencilFunc(GL_ALWAYS, 1, 0xFF);
 		glStencilMask(0xFF);
+		glStencilFunc(GL_ALWAYS, 1, 0xFF);
 		glEnable(GL_DEPTH_TEST);
 
 

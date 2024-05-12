@@ -74,6 +74,10 @@ public:
 	{
 		glUniform1iv(getUniformLocation(&var), 1, value);
 	}
+	void setInt(const char var, int value)
+	{
+		glUniform1i(getUniformLocation(&var), value);
+	}
 
 private:
 	void checkShaderError(unsigned int shader, std::string type)
