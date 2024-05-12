@@ -6,6 +6,7 @@
 #include <stb_image.h>
 #include <headers/model.h>
 #include <headers/paths.h>
+#include <headers/ripOFF.h>
 
 float lastX = 1000 / 2.0f;
 float lastY = 800 / 2.0f;
@@ -20,6 +21,8 @@ glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
 float yaw = -90.0f;
 float pitch = 0.0f;
+
+
 
 void processInput(GLFWwindow* window);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -40,12 +43,14 @@ int main()
 
 	Shader cubeShader("P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\cube_VertexShader.shader", "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\cube_FragmentShader.shader");
 	Shader platformShader("P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\platform_VertexShader.shader", "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\platform_FragmentShader.shader");
+	Shader scaledShader("P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\outline_Vertex.shader", "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\outline_fragment.shader");
 
-	 glEnable(GL_DEPTH_TEST);
-	
-	Platform* ground = new Platform;
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_STENCIL_TEST); 
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE); 
 
-	Cube cube;
+	Cube cube(glm::vec3(0.0f,0.0f,1.0f));
+	CubeR scaledCube(glm::vec3(1.0));
 
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
@@ -54,7 +59,7 @@ int main()
 	while (!glfwWindowShouldClose(window))
 	{
 		glClearColor(0.5, 0.5, 0.5, 1.0);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
 		
 		processInput(window);
 
@@ -73,12 +78,23 @@ int main()
 		cubeShader.setUniformMatrix(*"view", viewMatrix);
 		cubeShader.setUniformMatrix(*"proj", projMatrix);
 		*/
+
+		glStencilFunc(GL_ALWAYS, 1, 0xFF);
+		glStencilMask(0xFF);
+		cube.Draw(cubeShader, cameraPos, cameraFront, cameraUp);	
+
+		glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+		glStencilMask(0x00);
+		glDisable(GL_DEPTH_TEST);
+		scaledCube.Draw(scaledShader, cameraPos, cameraFront,cameraUp);
+
+		glStencilFunc(GL_ALWAYS, 1, 0xFF);
+		glStencilMask(0xFF);
+		glEnable(GL_DEPTH_TEST);
+
+
+			
 		
-		cube.Draw(cubeShader,cameraPos,cameraFront,cameraUp);
-	
-		ground->draw(platformShader, cameraPos, cameraFront, cameraUp);
-
-
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}

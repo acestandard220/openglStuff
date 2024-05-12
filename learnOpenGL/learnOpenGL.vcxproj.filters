@@ -21,6 +21,9 @@
     <ClCompile Include="src\stb.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="headers\ripOFF.h">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers\Shader.h">
@@ -51,5 +54,7 @@
     <None Include="assimp-vc140-mt.dll" />
     <None Include="Shaders\platform_FragmentShader.shader" />
     <None Include="Shaders\platform_VertexShader.shader" />
+    <None Include="Shaders\outline_fragment.shader" />
+    <None Include="Shaders\outline_Vertex.shader" />
   </ItemGroup>
 </Project>

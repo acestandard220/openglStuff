@@ -23,8 +23,8 @@ class Platform
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 			glBufferData(GL_ARRAY_BUFFER, sizeof(vertex), vertex, GL_STATIC_DRAW);
 			
-			glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
-			glEnableVertexAttribArray(2);
+			glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
+			glEnableVertexAttribArray(3);
 		}
 		void draw(Shader& shader, glm::vec3 camPos, glm::vec3 camFront, glm::vec3 camUp)
 		{
@@ -51,7 +51,7 @@ class Platform
 
 			modelMatrix = glm::rotate(modelMatrix,glm::radians(90.0f),glm::vec3(1.0f,0.0f,0.0f));
 			modelMatrix = glm::scale(modelMatrix, glm::vec3(5.0f));
-			modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, -10.0f, 1.0f));
+			modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, -1.0f, 1.0f));
 			viewMatrix = glm::lookAt(camPos, camPos + camFront, camUp);
 			projMatrix = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 1000.0f);
 

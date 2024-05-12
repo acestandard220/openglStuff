@@ -133,6 +133,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="headers\ripOFF.h" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\stb.cpp" />
   </ItemGroup>
@@ -149,6 +150,8 @@
     <None Include="assimp-vc140-mt.dll" />
     <None Include="Shaders\cube_FragmentShader.shader" />
     <None Include="Shaders\cube_VertexShader.shader" />
+    <None Include="Shaders\outline_fragment.shader" />
+    <None Include="Shaders\outline_Vertex.shader" />
     <None Include="Shaders\platform_FragmentShader.shader" />
     <None Include="Shaders\platform_VertexShader.shader" />
   </ItemGroup>
