@@ -10,7 +10,8 @@
 
 
 /// <TODO>
-///  Add Textures for the Ground plane.
+///  Add Textures for the Ground plane. [DONE]
+///  Update cube and platform renderers to accept model matrix from main.cpp 
 /// </TODO>
 
 float lastX = 1000 / 2.0f;
@@ -55,8 +56,9 @@ int main()
 	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE); 
 	glStencilMask(0xFF);
 
-	Cube cube(WORN_PLANKS);
-	CubeR scaledCube(glm::vec3(1.0));
+//	Cube cube(WORN_PLANKS);
+	//CubeR scaledCube(glm::vec3(1.0));
+	Platform quad(WORN_PLANKS);
 
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
@@ -85,18 +87,7 @@ int main()
 		cubeShader.setUniformMatrix(*"proj", projMatrix);
 		*/
 
-		glStencilFunc(GL_ALWAYS, 1, 0xFF);
-		glStencilMask(0xFF);
-		cube.Draw(cubeShader, cameraPos, cameraFront, cameraUp);
-
-		glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-		glStencilMask(0x00);
-		glDisable(GL_DEPTH_TEST);
-		scaledCube.Draw(scaledShader, cameraPos, cameraFront, cameraUp);
-
-		glStencilMask(0xFF);
-		glStencilFunc(GL_ALWAYS, 1, 0xFF);
-		glEnable(GL_DEPTH_TEST);
+		quad.draw(platformShader, cameraPos, cameraFront, cameraUp);
 
 
 			

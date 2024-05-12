@@ -56,5 +56,7 @@
     <None Include="Shaders\platform_VertexShader.shader" />
     <None Include="Shaders\outline_fragment.shader" />
     <None Include="Shaders\outline_Vertex.shader" />
+    <None Include="Shaders\cube_VertexShader.shader" />
+    <None Include="Shaders\cube_FragmentShader.shader" />
   </ItemGroup>
 </Project>
