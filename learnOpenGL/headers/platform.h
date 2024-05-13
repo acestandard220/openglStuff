@@ -78,7 +78,7 @@ class Platform
 			//modelMatrix = glm::rotate(modelMatrix,glm::radians(90.0f),glm::vec3(1.0f,0.0f,0.0f));
 			modelMatrix = glm::scale(modelMatrix, glm::vec3(1.1f));
 			modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, -1.0f));
-			viewMatrix = glm::lookAt(camPos, camPos + camFront, camUp);
+			viewMatrix = glm::lookAt(camPos, glm::vec3(0.0f,0.0f,-3.0f), camUp);
 			projMatrix = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 1000.0f);
 
 			shader.setUniformMatrix(*"model", modelMatrix);

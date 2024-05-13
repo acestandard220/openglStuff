@@ -86,6 +86,13 @@ public:
 			rotValue = 1;
 		}
 	}
+	void Disable(keys key)
+	{
+		if (key == ROTATE)
+		{
+			rotValue = 0;
+		}
+	}
 	void Enable(keys key, colors color,Shader& shader)
 	{
 		if (key == COLOR)
@@ -107,8 +114,8 @@ private:
 		glm::mat4 projMatrix = 1.0f;
 		glm::mat4 viewMatrix(1.0f);
 
-		modelMatrix = glm::rotate(modelMatrix, glm::radians(45.0f * (float)glfwGetTime() *rotValue), glm::vec3(1.0f, 1.0f, 1.0f));
-		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, -4.48f, -4.0f));
+		modelMatrix = glm::rotate(modelMatrix, glm::radians(45.0f * (float)glfwGetTime() *rotValue), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
 		viewMatrix = glm::lookAt(camPos, camPos + camFront, camUp);
 		projMatrix = glm::perspective(glm::radians(45.0f), 500 / 300.0f, 0.1f, 1000.0f);
 		

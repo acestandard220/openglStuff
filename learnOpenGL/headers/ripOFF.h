@@ -11,12 +11,8 @@ class CubeR
 {
 public:
 
-	bool rotate = false;
-	float rotValue = 0;
-	CubeR(glm::vec3 c)
+	CubeR()
 	{
-		color = c;
-
 		unsigned int vBuffer;
 
 		glGenBuffers(1, &vBuffer);
@@ -42,14 +38,13 @@ public:
 	
 private:
 
-	glm::vec3 color;
 	void transMatrix(Shader& shader, glm::vec3 camPos, glm::vec3 camFront, glm::vec3 camUp)
 	{
-		glm::mat4 modelMatrix = 1.0f;
-		glm::mat4 projMatrix = 1.0f;
+		glm::mat4 modelMatrix(1.0f);
+		glm::mat4 projMatrix(1.0f);
 		glm::mat4 viewMatrix(1.0f);
 
-		//modelMatrix = glm::rotate(modelMatrix, glm::radians(45.0f * (float)glfwGetTime()), glm::vec3(1.0f, 1.0f, 1.0f));
+		modelMatrix = glm::rotate(modelMatrix, glm::radians(45.0f * (float)glfwGetTime()), glm::vec3(1.0f, 1.0f, 1.0f));
 		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, -4.48f, -4.0f));
 		modelMatrix = glm::scale(modelMatrix, glm::vec3(1.03f));
 

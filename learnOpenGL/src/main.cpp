@@ -7,6 +7,8 @@
 #include <headers/model.h>
 #include <headers/paths.h>
 #include <headers/ripOFF.h>
+#include <imGUI/imgui.h>
+#include <imGUI/imgui_impl_glfw_gl3.h>
 
 
 /// <TODO>
@@ -29,7 +31,6 @@ float yaw = -90.0f;
 float pitch = 0.0f;
 
 
-
 void processInput(GLFWwindow* window);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -42,10 +43,9 @@ int main()
 	GLFWwindow* window = glfwCreateWindow(1000, 800, "amish", NULL, NULL);
 	glfwMakeContextCurrent(window);
 
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glewInit();
 
-	//stbi_set_flip_vertically_on_load(true);
 
 	Shader cubeShader("P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\cube_VertexShader.shader", "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\cube_FragmentShader.shader");
 	Shader platformShader("P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\platform_VertexShader.shader", "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\platform_FragmentShader.shader");
@@ -56,20 +56,83 @@ int main()
 	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE); 
 	glStencilMask(0xFF);
 
-//	Cube cube(WORN_PLANKS);
-	//CubeR scaledCube(glm::vec3(1.0));
-	Platform quad("P:/Projects/VS/learnOpenGL/learnOpenGL/Textures/grass.png");
+
+	//Platform quad("P:/Projects/VS/learnOpenGL/learnOpenGL/Textures/grass.png");
+	CubeR cube;
+	Cube f(WORN_PLANKS);
+
+	ImGui::CreateContext();
+	ImGui_ImplGlfwGL3_Init(window, true);
 
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
 	processInput(window);
 
+	bool show_demo_window = true;
+	bool show_another_window = false;
+	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+	 
+	bool rot = false;
+	glm::vec3 translation(1.0);
+
 	while (!glfwWindowShouldClose(window))
 	{
-		glClearColor(0.5, 0.5, 0.5, 1.0);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
-		
+
+		ImGui_ImplGlfwGL3_NewFrame();
+
+		glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
 		processInput(window);
+
+		
+
+		{
+			static float fl = 0.0f;
+			static int counter = 0;
+			ImGui::Text("Editor");                           
+			ImGui::SliderFloat("float", &fl , 0.0f, 1.0f);
+			ImGui::ColorEdit3("clear color", (float*)&clear_color); 
+
+			ImGui::Checkbox("Demo Window", &show_demo_window);     
+			ImGui::Checkbox("Another Window", &show_another_window);
+			ImGui::Checkbox("Rotation", &rot);
+			ImGui::SliderFloat3("Translation", &translation.x,0.0f,5.0f);
+
+			if (rot)
+			{
+				f.Enable(ROTATE);
+			}
+			else if(!rot)
+			{
+				f.Disable(ROTATE);
+			}
+		
+			
+
+			if (ImGui::Button("Button"))                           
+				counter++;
+			ImGui::SameLine();
+			ImGui::Text("counter = %d", counter);
+
+			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		}
+	
+
+		if (show_another_window)
+		{
+			ImGui::Begin("Another Window", &show_another_window);
+			ImGui::Text("Hello from another window!");
+			ImGui::Checkbox("Checket", &show_another_window);
+			if (ImGui::Button("Close Me"))
+				show_another_window = false;
+			ImGui::End();
+		}
+		if (show_demo_window)
+		{
+			ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiCond_FirstUseEver); 
+			ImGui::ShowDemoWindow(&show_demo_window);
+		}
 
 		/*
 		glm::mat4 modelMatrix(1.0f);
@@ -87,14 +150,21 @@ int main()
 		cubeShader.setUniformMatrix(*"proj", projMatrix);
 		*/
 
-		quad.draw(platformShader, cameraPos, cameraFront, cameraUp);
+		//quad.draw(platformShader, cameraPos, cameraFront, cameraUp);
 
-
-			
+		//cube.Draw(scaledShader,cameraPos,cameraFront,cameraUp);
 		
+		f.Draw(cubeShader, cameraPos, cameraFront, cameraUp);
+
+		ImGui::Render();
+		ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
+
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
+
+	ImGui_ImplGlfwGL3_Shutdown();
+	ImGui::DestroyContext();
 	glfwTerminate();
 	return 0;
 }
