@@ -58,7 +58,7 @@ int main()
 
 //	Cube cube(WORN_PLANKS);
 	//CubeR scaledCube(glm::vec3(1.0));
-	Platform quad(WORN_PLANKS);
+	Platform quad("P:/Projects/VS/learnOpenGL/learnOpenGL/Textures/grass.png");
 
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);

@@ -101,7 +101,6 @@ public:
 
 private:
 	
-	glm::vec3 color;
 	void transMatrix(Shader& shader, glm::vec3 camPos, glm::vec3 camFront, glm::vec3 camUp)
 	{
 		glm::mat4 modelMatrix = 1.0f;
