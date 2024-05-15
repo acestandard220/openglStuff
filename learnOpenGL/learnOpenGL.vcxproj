@@ -148,6 +148,7 @@
     <ClInclude Include="headers\paths.h" />
     <ClInclude Include="headers\platform.h" />
     <ClInclude Include="headers\Shader.h" />
+    <ClInclude Include="headers\transfoformations.h" />
     <ClInclude Include="imGUI\imconfig.h" />
     <ClInclude Include="imGUI\imgui.h" />
     <ClInclude Include="imGUI\imgui_impl_glfw_gl3.h" />

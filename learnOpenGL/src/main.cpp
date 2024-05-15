@@ -13,7 +13,12 @@
 
 /// <TODO>
 ///  Add Textures for the Ground plane. [DONE]
-///  Update cube and platform renderers to accept model matrix from main.cpp 
+///  Update cube and platform renderers to accept model matrix from main.cpp [DONE]
+///  Do MVP matrix multiplication operation on CPU side
+///  Switch all shader inputs to u_mvp
+///  Add the ability to select which gameObject you are working on.
+///  Addition of the remaining transforms(rotations,rotationSlow)
+///  Addition of along a specific axis transformation support 
 /// </TODO>
 
 float lastX = 1000 / 2.0f;
@@ -46,20 +51,15 @@ int main()
 	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glewInit();
 
+	Shader cubeShader(CUBE_VERTEX_SHADER,CUBE_FRAGMENT_SHADER);
 
-	Shader cubeShader("P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\cube_VertexShader.shader", "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\cube_FragmentShader.shader");
-	Shader platformShader("P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\platform_VertexShader.shader", "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\platform_FragmentShader.shader");
-	Shader scaledShader("P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\outline_Vertex.shader", "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\outline_fragment.shader");
+	Shader platformShader(PLATFORM_VERTEX_SHADER,PLATFORM_FRAGMENT_SHADER);
+	Shader scaledShader(SCALED_CUBE_VERTEX_SHADER,SCALED_CUBE_FRAGMENT_SHADER);
+
+	Cube cube(WORN_PLANKS);
+	Platform ground(RUST_COARSE);
 
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_STENCIL_TEST); 
-	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE); 
-	glStencilMask(0xFF);
-
-
-	//Platform quad("P:/Projects/VS/learnOpenGL/learnOpenGL/Textures/grass.png");
-	CubeR cube;
-	Cube f(WORN_PLANKS);
 
 	ImGui::CreateContext();
 	ImGui_ImplGlfwGL3_Init(window, true);
@@ -73,7 +73,7 @@ int main()
 	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 	 
 	bool rot = false;
-	glm::vec3 translation(1.0);
+	glm::vec3 translation(1.0f,1.0f,1.0f);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -93,22 +93,10 @@ int main()
 			ImGui::Text("Editor");                           
 			ImGui::SliderFloat("float", &fl , 0.0f, 1.0f);
 			ImGui::ColorEdit3("clear color", (float*)&clear_color); 
+			ImGui::SliderFloat3("Scale", &translation.x,0.1f,10.0f);
 
 			ImGui::Checkbox("Demo Window", &show_demo_window);     
 			ImGui::Checkbox("Another Window", &show_another_window);
-			ImGui::Checkbox("Rotation", &rot);
-			ImGui::SliderFloat3("Translation", &translation.x,0.0f,5.0f);
-
-			if (rot)
-			{
-				f.Enable(ROTATE);
-			}
-			else if(!rot)
-			{
-				f.Disable(ROTATE);
-			}
-		
-			
 
 			if (ImGui::Button("Button"))                           
 				counter++;
@@ -128,12 +116,24 @@ int main()
 				show_another_window = false;
 			ImGui::End();
 		}
+
 		if (show_demo_window)
 		{
 			ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiCond_FirstUseEver); 
 			ImGui::ShowDemoWindow(&show_demo_window);
 		}
 
+		glm::mat4 modelMatrix(1.0f);
+
+		//modelMatrix = glm::rotate(modelMatrix, glm::radians(45.0f * (float)glfwGetTime()), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
+		modelMatrix = glm::scale(modelMatrix, translation);
+
+		ground.transMatrix(platformShader, modelMatrix, cameraPos, cameraFront, cameraUp);
+		ground.draw(platformShader);
+
+		cube.transMatrix(cubeShader, modelMatrix, cameraPos, cameraFront, cameraUp);
+		cube.Draw(cubeShader);
 		/*
 		glm::mat4 modelMatrix(1.0f);
 		glm::mat4 viewMatrix(1.0f);
@@ -154,7 +154,6 @@ int main()
 
 		//cube.Draw(scaledShader,cameraPos,cameraFront,cameraUp);
 		
-		f.Draw(cubeShader, cameraPos, cameraFront, cameraUp);
 
 		ImGui::Render();
 		ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
