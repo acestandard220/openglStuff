@@ -14,6 +14,6 @@ namespace TEXTURES
 {
 	#define COAST_SAND "P:/Projects/VS/learnOpenGL/learnOpenGL/Textures/coast_sand_rocks_02_diff_2k.jpg" 
 	#define	WORN_PLANKS "P:/Projects/VS/learnOpenGL/learnOpenGL/Textures/worn_planks_diff_2k.jpg"
-#define RUST_COARSE "P:/Projects/VS/learnOpenGL/learnOpenGL/Textures/rust_coarse_01_diff_2k.jpg"
+    #define RUST_COARSE "P:/Projects/VS/learnOpenGL/learnOpenGL/Textures/rust_coarse_01_diff_2k.jpg"
 
 }

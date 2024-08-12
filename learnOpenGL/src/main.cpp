@@ -57,9 +57,9 @@ int main()
 	glStencilMask(0xFF);
 
 
-	//Platform quad("P:/Projects/VS/learnOpenGL/learnOpenGL/Textures/grass.png");
-	CubeR cube;
-	Cube f(WORN_PLANKS);
+	Platform ground(COAST_SAND);
+	
+	Cube cube(WORN_PLANKS);
 
 	ImGui::CreateContext();
 	ImGui_ImplGlfwGL3_Init(window, true);
@@ -84,7 +84,7 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 		processInput(window);
-
+/*
 		
 
 		{
@@ -134,7 +134,7 @@ int main()
 			ImGui::ShowDemoWindow(&show_demo_window);
 		}
 
-		/*
+		
 		glm::mat4 modelMatrix(1.0f);
 		glm::mat4 viewMatrix(1.0f);
 		glm::mat4 projMatrix(1.0);
@@ -148,13 +148,14 @@ int main()
 		cubeShader.setUniformMatrix(*"model", modelMatrix);
 		cubeShader.setUniformMatrix(*"view", viewMatrix);
 		cubeShader.setUniformMatrix(*"proj", projMatrix);
+		
+
 		*/
 
-		//quad.draw(platformShader, cameraPos, cameraFront, cameraUp);
+		ground.draw(platformShader, cameraPos, cameraFront, cameraUp);
 
-		//cube.Draw(scaledShader,cameraPos,cameraFront,cameraUp);
 		
-		f.Draw(cubeShader, cameraPos, cameraFront, cameraUp);
+		cube.Draw(cubeShader, cameraPos, cameraFront, cameraUp);
 
 		ImGui::Render();
 		ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
