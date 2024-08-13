@@ -12,6 +12,10 @@
 
 
 /// <TODO>
+/// 
+/// <AS SOON AS POSSIBLE>
+/// Allow draw calls without mandatory call of transMatrix function
+/// <//>
 ///  Add Textures for the Ground plane. [DONE]
 ///  Update cube and platform renderers to accept model matrix from main.cpp [DONE]
 ///  Do MVP matrix multiplication operation on CPU side
@@ -25,7 +29,7 @@ float lastX = 1000 / 2.0f;
 float lastY = 800 / 2.0f;
 bool firstMouse = true;
 
-float deltaTime = 0.0f;	
+float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
@@ -51,20 +55,17 @@ int main()
 	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glewInit();
 
-	Shader cubeShader(CUBE_VERTEX_SHADER,CUBE_FRAGMENT_SHADER);
+	Shader cubeShader(CUBE_VERTEX_SHADER, CUBE_FRAGMENT_SHADER);
 
-	Shader platformShader(PLATFORM_VERTEX_SHADER,PLATFORM_FRAGMENT_SHADER);
-	Shader scaledShader(SCALED_CUBE_VERTEX_SHADER,SCALED_CUBE_FRAGMENT_SHADER);
+	Shader platformShader(PLATFORM_VERTEX_SHADER, PLATFORM_FRAGMENT_SHADER);
+	Shader scaledShader(SCALED_CUBE_VERTEX_SHADER, SCALED_CUBE_FRAGMENT_SHADER);
+	Shader modelShader(MODEL_VERTEX_SHADER, MODEL_FRAGMENT_SHADER);
 
-	Cube cube(WORN_PLANKS);
+	Cube cube(WOOD_PEELING);
 	Platform ground(RUST_COARSE);
+	
 
 	glEnable(GL_DEPTH_TEST);
-
-
-	Platform ground(COAST_SAND);
-	
-	Cube cube(WORN_PLANKS);
 
 	ImGui::CreateContext();
 	ImGui_ImplGlfwGL3_Init(window, true);
@@ -76,84 +77,45 @@ int main()
 	bool show_demo_window = true;
 	bool show_another_window = false;
 	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-	 
+
 	bool rot = false;
-	glm::vec3 translation(1.0f,1.0f,1.0f);
+	glm::vec3 translation(1.0f, 1.0f, 1.0f);
+
+	stbi_set_flip_vertically_on_load(true);
 
 	while (!glfwWindowShouldClose(window))
 	{
 
-		ImGui_ImplGlfwGL3_NewFrame();
+		
 
 		glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 		processInput(window);
-/*
-		
 
-		{
-			static float fl = 0.0f;
-			static int counter = 0;
-			ImGui::Text("Editor");                           
-			ImGui::SliderFloat("float", &fl , 0.0f, 1.0f);
-			ImGui::ColorEdit3("clear color", (float*)&clear_color); 
-			ImGui::SliderFloat3("Scale", &translation.x,0.1f,10.0f);
 
-			ImGui::Checkbox("Demo Window", &show_demo_window);     
-			ImGui::Checkbox("Another Window", &show_another_window);
 
-			if (ImGui::Button("Button"))                           
-				counter++;
-			ImGui::SameLine();
-			ImGui::Text("counter = %d", counter);
 
-			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-		}
-	
-
-		if (show_another_window)
-		{
-			ImGui::Begin("Another Window", &show_another_window);
-			ImGui::Text("Hello from another window!");
-			ImGui::Checkbox("Checket", &show_another_window);
-			if (ImGui::Button("Close Me"))
-				show_another_window = false;
-			ImGui::End();
-		}
-
-		if (show_demo_window)
-		{
-			ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiCond_FirstUseEver); 
-			ImGui::ShowDemoWindow(&show_demo_window);
-		}
-
-		
 		glm::mat4 modelMatrix(1.0f);
+
+		//modelMatrix = glm::rotate(modelMatrix, glm::radians(45.0f * (float)glfwGetTime()), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
+		modelMatrix = glm::scale(modelMatrix, translation);
 		glm::mat4 viewMatrix(1.0f);
-		glm::mat4 projMatrix(1.0);
+		glm::mat4 projMatrix(1.0f);
 
-		cmodelMatrix = glm::rotate(modelMatrix,glm::radians(45.0f), glm::vec3(1.0, 1.0f, 1.0f));
-		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0,0.0,0.0));
-		modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0, 1.0, 1.0f));
-		viewMatrix = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-		projMatrix = glm::perspective(glm::radians(45.0f), (float)1000.0f / (float)800, 0.1f, 10000.0f);
+		viewMatrix = glm::lookAt(cameraPos, cameraFront + cameraPos, cameraUp);
+		projMatrix = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 1000.0f);
 
-		cubeShader.setUniformMatrix(*"model", modelMatrix);
-		cubeShader.setUniformMatrix(*"view", viewMatrix);
-		cubeShader.setUniformMatrix(*"proj", projMatrix);
+
+		///
+		//ground.transMatrix(platformShader, modelMatrix, cameraPos, cameraFront, cameraUp);
+		ground.draw(platformShader);
+
+		cube.transMatrix(cubeShader, modelMatrix, cameraPos, cameraFront, cameraUp);
+		cube.Draw(cubeShader);
 		
-
-		*/
-
-		ground.draw(platformShader, cameraPos, cameraFront, cameraUp);
-
 		
-		cube.Draw(cubeShader, cameraPos, cameraFront, cameraUp);
-
-		ImGui::Render();
-		ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
-
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}

@@ -94,5 +94,7 @@
     <None Include="Shaders\outline_Vertex.shader" />
     <None Include="Shaders\cube_VertexShader.shader" />
     <None Include="Shaders\cube_FragmentShader.shader" />
+    <None Include="Shaders\modelFragmentShader.shader" />
+    <None Include="Shaders\modelVertexShader.shader" />
   </ItemGroup>
 </Project>
