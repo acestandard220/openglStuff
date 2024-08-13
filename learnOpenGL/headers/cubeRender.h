@@ -64,16 +64,54 @@ public:
 		}
 		stbi_image_free(data);
 
+		glBindTexture(GL_TEXTURE_2D, 0);
 
 
 	}
 
-	
+	void transMatrix(Shader& shader, glm::vec3 camPos, glm::vec3 camFront, glm::vec3 camUp)
+	{
+		glm::mat4 modelMatrix = 1.0f;
+		glm::mat4 projMatrix = 1.0f;
+		glm::mat4 viewMatrix(1.0f);
 
-	void Draw(Shader& shader,glm::vec3 camPos,glm::vec3 camFront,glm::vec3 camUp)
+		modelMatrix = glm::rotate(modelMatrix, glm::radians(45.0f * (float)glfwGetTime() * rotValue), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
+		viewMatrix = glm::lookAt(camPos, camPos + camFront, camUp);
+		projMatrix = glm::perspective(glm::radians(45.0f), 500 / 300.0f, 0.1f, 1000.0f);
+
+		shader.use();
+		glm::mat4 u_mvp = projMatrix * viewMatrix * modelMatrix;
+
+		shader.setUniformMatrix(*"u_mvp", u_mvp);
+
+		shader.setInt(*"texture", texture);
+
+	}
+
+	void transMatrix(Shader& shader, glm::mat4 modelMat, glm::vec3 camPos, glm::vec3 camFront, glm::vec3 camUp)
+	{
+		glm::mat4 modelMatrix = modelMat; 
+		glm::mat4 projMatrix = 1.0f;
+		glm::mat4 viewMatrix(1.0f);
+
+		modelMatrix = glm::rotate(modelMatrix, glm::radians(45.0f * (float)glfwGetTime() * rotValue), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
+		viewMatrix = glm::lookAt(camPos, camPos + camFront, camUp);
+		projMatrix = glm::perspective(glm::radians(45.0f), 500 / 300.0f, 0.1f, 1000.0f);
+
+		glm::mat4 u_mvp = projMatrix * viewMatrix * modelMatrix;
+
+		shader.use();
+		shader.setUniformMatrix(*"u_mvp", u_mvp);
+
+		shader.setInt(*"texture", texture);
+
+	}
+
+	void Draw(Shader& shader)
 	{
 		shader.use();
-		transMatrix(shader, camPos,camFront,camUp);
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		
@@ -108,23 +146,7 @@ public:
 
 private:
 	
-	void transMatrix(Shader& shader, glm::vec3 camPos, glm::vec3 camFront, glm::vec3 camUp)
-	{
-		glm::mat4 modelMatrix = 1.0f;
-		glm::mat4 projMatrix = 1.0f;
-		glm::mat4 viewMatrix(1.0f);
 
-		modelMatrix = glm::rotate(modelMatrix, glm::radians(45.0f * (float)glfwGetTime() *rotValue), glm::vec3(0.0f, 1.0f, 0.0f));
-		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
-		viewMatrix = glm::lookAt(camPos, camPos + camFront, camUp);
-		projMatrix = glm::perspective(glm::radians(45.0f), 500 / 300.0f, 0.1f, 1000.0f);
-		
-		shader.setUniformMatrix(*"model", modelMatrix);
-		shader.setUniformMatrix(*"view", viewMatrix);
-		shader.setUniformMatrix(*"proj", projMatrix);
-		shader.setInt(*"texture", texture);
-
-	}
 	float vertex[72+108] = {
 			 -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 			 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,

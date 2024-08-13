@@ -45,17 +45,55 @@ class Platform
 			unsigned char* data = stbi_load(texturePath, &width, &height, &nChannel,0);
 			if (data)
 			{
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE,data);
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE,data);
 				glGenerateMipmap(GL_TEXTURE_2D);
-			}else{std::cout<<"NOPE"; }
+			}else{std::cout<<"NOPE, couldn't load the texture."; }
 			stbi_image_free(data);
 
+
 		}
-		void draw(Shader& shader, glm::vec3 camPos, glm::vec3 camFront, glm::vec3 camUp)
+
+		void transMatrix(Shader& shader, glm::vec3 camPos, glm::vec3 camFront, glm::vec3 camUp)
+		{
+			glm::mat4 modelMatrix(1.0f);
+			glm::mat4 viewMatrix(1.0f);
+			glm::mat4 projMatrix(1.0f);
+
+			modelMatrix = glm::rotate(modelMatrix,glm::radians(90.0f),glm::vec3(1.0f,0.0f,0.0f));
+			modelMatrix = glm::scale(modelMatrix, glm::vec3(1.1f));
+			modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, -1.0f));
+			viewMatrix = glm::lookAt(camPos,camFront+camPos, camUp);
+			projMatrix = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 1000.0f);
+
+			shader.use();
+			shader.setUniformMatrix(*"model", modelMatrix);
+			shader.setUniformMatrix(*"view", viewMatrix);
+			shader.setUniformMatrix(*"proj", projMatrix);
+			shader.setInt(*"tex", texture);
+
+
+		}
+		void transMatrix(Shader& shader, glm::mat4 modelMat, glm::vec3 camPos, glm::vec3 camFront, glm::vec3 camUp)
+		{
+			glm::mat4 modelMatrix = modelMat;
+			glm::mat4 viewMatrix(1.0f);
+			glm::mat4 projMatrix(1.0f);
+
+			viewMatrix = glm::lookAt(camPos, camFront + camPos, camUp);
+			projMatrix = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 1000.0f);
+
+			shader.use();
+			shader.setUniformMatrix(*"model", modelMatrix);
+			shader.setUniformMatrix(*"view", viewMatrix);
+			shader.setUniformMatrix(*"proj", projMatrix);
+			shader.setInt(*"tex", texture);
+
+
+		}
+		void draw(Shader& shader)
 		{
 			shader.use();
 			glBindTexture(GL_TEXTURE_2D, texture);
-			transMatrix(shader,camPos, camFront, camUp);
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		} 
 	private:
@@ -69,23 +107,5 @@ class Platform
 			0,1,3,
 			1,2,3
 		};
-		void transMatrix(Shader& shader,glm::vec3 camPos,glm::vec3 camFront,glm::vec3 camUp)
-		{
-			glm::mat4 modelMatrix(1.0f);
-			glm::mat4 viewMatrix(1.0f);
-			glm::mat4 projMatrix(1.0f);
-
-			//modelMatrix = glm::rotate(modelMatrix,glm::radians(90.0f),glm::vec3(1.0f,0.0f,0.0f));
-			modelMatrix = glm::scale(modelMatrix, glm::vec3(1.1f));
-			modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, -1.0f));
-			viewMatrix = glm::lookAt(camPos, glm::vec3(0.0f,0.0f,-3.0f), camUp);
-			projMatrix = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 1000.0f);
-
-			shader.setUniformMatrix(*"model", modelMatrix);
-			shader.setUniformMatrix(*"view", viewMatrix);
-			shader.setUniformMatrix(*"proj", projMatrix);
-			shader.setInt(*"tex", texture);
-
-
-		}
+	
 };
