@@ -8,10 +8,10 @@
 
 enum keys {
 	ROTATE = 0,
-	COLOR =1
+	COLOR = 1
 };
 enum colors {
-	RED =0,
+	RED = 0,
 	YELLOW = 2,
 	GREEN = 3,
 };
@@ -24,23 +24,23 @@ public:
 	float rotValue = 0;
 	unsigned int texture;
 	Cube(const char* texture_Path)
-	{		
+	{
 		unsigned int vBuffer;
 
 		glGenBuffers(1, &vBuffer);
-		
+
 		glBindBuffer(GL_ARRAY_BUFFER, vBuffer);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(vertex), vertex, GL_STATIC_DRAW);
-		
+
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
 		glEnableVertexAttribArray(0);
 
 		//CHANGED SOMETHING HERE N****
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3*sizeof(float)));
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 		glEnableVertexAttribArray(1);
 
 
-		
+
 		glGenTextures(1, &texture);
 		glBindTexture(GL_TEXTURE_2D, texture);
 
@@ -51,7 +51,7 @@ public:
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 		int width, height, nrChannels;
-		stbi_set_flip_vertically_on_load(true); 
+		stbi_set_flip_vertically_on_load(true);
 		unsigned char* data = stbi_load(texture_Path, &width, &height, &nrChannels, 0);
 		if (data)
 		{
@@ -91,7 +91,7 @@ public:
 
 	void transMatrix(Shader& shader, glm::mat4 modelMat, glm::vec3 camPos, glm::vec3 camFront, glm::vec3 camUp)
 	{
-		glm::mat4 modelMatrix = modelMat; 
+		glm::mat4 modelMatrix = modelMat;
 		glm::mat4 projMatrix = 1.0f;
 		glm::mat4 viewMatrix(1.0f);
 
@@ -108,13 +108,15 @@ public:
 		shader.setInt(*"texture", texture);
 
 	}
+	// call one of the transMAtrix functions before using draw.
 
 	void Draw(Shader& shader)
 	{
 		shader.use();
 		glBindTexture(GL_TEXTURE_2D, texture);
+
 		glDrawArrays(GL_TRIANGLES, 0, 36);
-		
+
 	}
 
 	void Enable(keys key)
@@ -131,12 +133,12 @@ public:
 			rotValue = 0;
 		}
 	}
-	void Enable(keys key, colors color,Shader& shader)
+	void Enable(keys key, colors color, Shader& shader)
 	{
 		if (key == COLOR)
 		{
-			shader.setVec3(*"color",glm::vec3(0.0f,1.0f,0.0f));
-			
+			shader.setVec3(*"color", glm::vec3(0.0f, 1.0f, 0.0f));
+
 		}
 		else {
 			return;
@@ -145,44 +147,44 @@ public:
 
 
 private:
-	
 
-	float vertex[72+108] = {
+
+	float vertex[72 + 108] = {
 			 -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 			 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
 			 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
 			 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
 			-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
 			-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-		
+
 			-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
 			 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
 			 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
 			 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
 			-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
 			-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		
+
 			-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
 			-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
 			-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
 			-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
 			-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
 			-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		
+
 			 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
 			 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
 			 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
 			 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
 			 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
 			 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		
+
 			-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
 			 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
 			 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
 			 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
 			-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
 			-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		
+
 			-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
 			 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
 			 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
