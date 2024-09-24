@@ -5,6 +5,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <stb_image.h>
+#include <cassert>
+//***********************************************             ATTENTION                *******************************************
+// call one of the transMAtrix functions before using draw.
 
 enum keys {
 	ROTATE = 0,
@@ -16,30 +19,40 @@ enum colors {
 	GREEN = 3,
 };
 
+enum DEFAULTS {
+	U_MVP
+};
+
+bool flag = false;
+
 class Cube
 {
 public:
 
 	bool rotate = false;
 	float rotValue = 0;
+
 	unsigned int texture;
+	unsigned int vArray;
 	Cube(const char* texture_Path)
 	{
 		unsigned int vBuffer;
+		
+		glGenVertexArrays(1, &vArray);
+		glBindVertexArray(vArray);
 
 		glGenBuffers(1, &vBuffer);
-
 		glBindBuffer(GL_ARRAY_BUFFER, vBuffer);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(vertex), vertex, GL_STATIC_DRAW);
 
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), 0);
 		glEnableVertexAttribArray(0);
 
 		//CHANGED SOMETHING HERE N****
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
 		glEnableVertexAttribArray(1);
 
-
+		
 
 		glGenTextures(1, &texture);
 		glBindTexture(GL_TEXTURE_2D, texture);
@@ -65,11 +78,49 @@ public:
 		stbi_image_free(data);
 
 		glBindTexture(GL_TEXTURE_2D, 0);
+		
 
+	}
+	Cube(unsigned int textureID) : texture(textureID)
+	{
+		unsigned int vBuffer;
+
+		glGenVertexArrays(1, &vArray);
+		glBindVertexArray(vArray);
+
+		glGenBuffers(1, &vBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, vBuffer);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertex), vertex, GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), 0);
+		glEnableVertexAttribArray(0);
+
+		//CHANGED SOMETHING HERE N****
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);				
+
+	}
+	Cube()
+	{
+		unsigned int vBuffer;
+
+		glGenVertexArrays(1, &vArray);
+		glBindVertexArray(vArray);
+
+		glGenBuffers(1, &vBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, vBuffer);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertex), vertex, GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), 0);
+		glEnableVertexAttribArray(0);
+
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
 
 	}
 
-	void transMatrix(Shader& shader, glm::vec3 camPos, glm::vec3 camFront, glm::vec3 camUp)
+
+	void UseDefaultMVP(Shader& shader, glm::vec3 camPos, glm::vec3 camFront, glm::vec3 camUp)
 	{
 		glm::mat4 modelMatrix = 1.0f;
 		glm::mat4 projMatrix = 1.0f;
@@ -77,7 +128,7 @@ public:
 
 		modelMatrix = glm::rotate(modelMatrix, glm::radians(45.0f * (float)glfwGetTime() * rotValue), glm::vec3(0.0f, 1.0f, 0.0f));
 		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
-		viewMatrix = glm::lookAt(camPos, camPos + camFront, camUp);
+		viewMatrix = glm::lookAt(camPos,camPos+camFront,camUp);
 		projMatrix = glm::perspective(glm::radians(45.0f), 500 / 300.0f, 0.1f, 1000.0f);
 
 		shader.use();
@@ -86,17 +137,15 @@ public:
 		shader.setUniformMatrix(*"u_mvp", u_mvp);
 
 		shader.setInt(*"texture", texture);
-
 	}
 
-	void transMatrix(Shader& shader, glm::mat4 modelMat, glm::vec3 camPos, glm::vec3 camFront, glm::vec3 camUp)
+	void SetMVP(Shader& shader, glm::mat4 modelMat, glm::vec3 camPos, glm::vec3 camFront, glm::vec3 camUp)
 	{
 		glm::mat4 modelMatrix = modelMat;
 		glm::mat4 projMatrix = 1.0f;
 		glm::mat4 viewMatrix(1.0f);
 
-		modelMatrix = glm::rotate(modelMatrix, glm::radians(45.0f * (float)glfwGetTime() * rotValue), glm::vec3(0.0f, 1.0f, 0.0f));
-		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
+
 		viewMatrix = glm::lookAt(camPos, camPos + camFront, camUp);
 		projMatrix = glm::perspective(glm::radians(45.0f), 500 / 300.0f, 0.1f, 1000.0f);
 
@@ -104,19 +153,21 @@ public:
 
 		shader.use();
 		shader.setUniformMatrix(*"u_mvp", u_mvp);
+		shader.setUniformMatrix(*"model", modelMatrix);
+		shader.setVec3(*"cameraPos", camPos);
 
 		shader.setInt(*"texture", texture);
-
+	
 	}
 	// call one of the transMAtrix functions before using draw.
 
 	void Draw(Shader& shader)
-	{
+	{		
 		shader.use();
 		glBindTexture(GL_TEXTURE_2D, texture);
-
+		glBindVertexArray(vArray);
+		stbi_set_flip_vertically_on_load(true);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
-
 	}
 
 	void Enable(keys key)
@@ -149,48 +200,49 @@ public:
 private:
 
 
-	float vertex[72 + 108] = {
-			 -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-			 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-			 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-			 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-			-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-			-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+	float vertex[72 + 108+36] = {
+	
+	-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 
-			-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-			 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-			 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-			 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-			-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-			-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+	 0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+	 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+	 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+	-0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
 
-			-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-			-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-			-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-			-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-			-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-			-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+	-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+	-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+	-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+	-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+	-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+	-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
 
-			 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-			 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-			 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-			 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-			 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-			 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+	 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+	 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+	 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+	 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+	 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+	 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
 
-			-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-			 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-			 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-			 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-			-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-			-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+	 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+	 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+	 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
 
-			-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-			 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-			 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-			 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-			-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-			-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+	 -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+	 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+	 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+	 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+	-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+	-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
 	};
 
 

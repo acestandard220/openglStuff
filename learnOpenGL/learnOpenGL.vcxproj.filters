@@ -83,18 +83,29 @@
     <ClInclude Include="headers\transfoformations.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="headers\skybox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\pointRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\model_FragmentShader.shader" />
-    <None Include="Shaders\model_VertexShader.shader" />
+    <None Include="Shaders\model_FragmentShader.frag" />
+    <None Include="Shaders\model_VertexShader.vert" />
     <None Include="assimp-vc140-mt.dll" />
-    <None Include="Shaders\platform_FragmentShader.shader" />
-    <None Include="Shaders\platform_VertexShader.shader" />
-    <None Include="Shaders\outline_fragment.shader" />
-    <None Include="Shaders\outline_Vertex.shader" />
-    <None Include="Shaders\cube_VertexShader.shader" />
-    <None Include="Shaders\cube_FragmentShader.shader" />
-    <None Include="Shaders\modelFragmentShader.shader" />
-    <None Include="Shaders\modelVertexShader.shader" />
+    <None Include="Shaders\platform_FragmentShader.frag" />
+    <None Include="Shaders\platform_VertexShader.vert" />
+    <None Include="Shaders\outline_fragment.frag" />
+    <None Include="Shaders\outline_Vertex.vert" />
+    <None Include="Shaders\cube_VertexShader.vert" />
+    <None Include="Shaders\cube_FragmentShader.frag" />
+    <None Include="Shaders\modelFragmentShader.frag" />
+    <None Include="Shaders\modelVertexShader.vert" />
+    <None Include="Shaders\skybox_vertex.vert" />
+    <None Include="Shaders\skybox_frag.frag" />
+    <None Include="Shaders\pointVertex.vert" />
+    <None Include="Shaders\pointFrag.frag" />
+    <None Include="Shaders\pointGeo.geom" />
   </ItemGroup>
 </Project>

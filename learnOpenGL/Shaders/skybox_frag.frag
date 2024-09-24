@@ -2,9 +2,9 @@
 
 out vec4 Frag;
 
-in vec2 textureCoord;
+in vec3 textureCoord;
 
-uniform sampler2D text;
+uniform samplerCube text;
 
 void main()
 {

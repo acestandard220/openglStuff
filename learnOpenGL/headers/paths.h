@@ -1,17 +1,25 @@
 #pragma once
 
 //SHADER PATHS
-#define CUBE_VERTEX_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\cube_VertexShader.shader"
-#define CUBE_FRAGMENT_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\cube_FragmentShader.shader"
+#define CUBE_VERTEX_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\cube_VertexShader.vert"
+#define CUBE_FRAGMENT_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\cube_FragmentShader.frag"
 
-#define PLATFORM_VERTEX_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\platform_VertexShader.shader"
-#define PLATFORM_FRAGMENT_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\platform_FragmentShader.shader"
+#define PLATFORM_VERTEX_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\platform_VertexShader.vert"
+#define PLATFORM_FRAGMENT_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\platform_FragmentShader.frag"
 
-#define SCALED_CUBE_VERTEX_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\outline_Vertex.shader"
-#define SCALED_CUBE_FRAGMENT_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\outline_fragment.shader"
+#define SCALED_CUBE_VERTEX_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\outline_Vertex.vert"
+#define SCALED_CUBE_FRAGMENT_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\outline_fragment.frag"
 
-#define MODEL_VERTEX_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\modelVertexShader.shader"
-#define MODEL_FRAGMENT_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\modelFragmentShader.shader"
+#define MODEL_VERTEX_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\modelVertexShader.vert"
+#define MODEL_FRAGMENT_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\modelFragmentShader.frag"
+
+#define SKYBOX_VERTEX_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\skybox_vertex.vert"
+#define SKYBOX_FRAGMENT_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\skybox_frag.frag"
+
+
+#define POINT_VERTEX_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\pointVertex.vert"
+#define POINT_FRAGMENT_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\pointFrag.frag"
+#define POINT_GEOMETRY_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\pointGeo.geom"
 
 
 //MODEL PATHS
@@ -22,8 +30,7 @@
 #define FIRE_HYDRANT "P:/Projects/VS/learnOpenGL/Models/learnOpenGL/scene/scene.obj"
 
 
-namespace TEXTURES
-{
+
 #define COAST_SAND "P:/Projects/VS/learnOpenGL/learnOpenGL/Textures/coast_sand_rocks_02_diff_2k.jpg" 
 #define	WORN_PLANKS "P:/Projects/VS/learnOpenGL/learnOpenGL/Textures/worn_planks_diff_2k.jpg"
 #define RUST_COARSE "P:/Projects/VS/learnOpenGL/learnOpenGL/Textures/rust_coarse_01_diff_2k.jpg"
@@ -32,4 +39,7 @@ namespace TEXTURES
 #define ALSPHAT_TRACK "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Textures\\asphalt_track_diff_4k.jpg"
 #define WOOD_PEELING  "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Textures\\wood_peeling_paint_weathered_diff_8k.jpg"
 
-}
+//CUBEMAPS
+#define SKY_BOX "P:/Projects/VS/learnOpenGL/learnOpenGL/Textures/skybox"
+
+

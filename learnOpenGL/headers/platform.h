@@ -40,6 +40,8 @@ class Platform
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
+		
+
 			int height, width, nChannel;
 			stbi_set_flip_vertically_on_load(true);
 			unsigned char* data = stbi_load(texturePath, &width, &height, &nChannel,0);

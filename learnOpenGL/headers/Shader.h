@@ -14,6 +14,7 @@ public:
 	unsigned int ID;
 	std::string vertexCode;
 	std::string fragmentCode;
+	std::string geometryCode;
 	Shader(){}
 	Shader(const char* vertexPath, const char* fragmentPath)
 	{
@@ -50,6 +51,59 @@ public:
 		ID = glCreateProgram();
 		glAttachShader(ID, vertex);
 		glAttachShader(ID, fragment);
+		glLinkProgram(ID);
+		checkShaderError(ID, "PROGRAM");
+	}
+	Shader(const char* vertexPath, const char* fragmentPath,const char* geometryPath)
+	{
+		std::ifstream vShade;
+		std::ifstream fShade;
+		std::ifstream gShade;
+
+		vShade.open(vertexPath);
+		fShade.open(fragmentPath);
+		gShade.open(geometryPath);
+
+		std::stringstream vStream, fStream, gStream;
+		vStream << vShade.rdbuf();
+		fStream << fShade.rdbuf();
+		gStream << gShade.rdbuf();
+
+		vShade.close();
+		fShade.close();
+		gShade.close();
+		vertexCode = vStream.str();
+		fragmentCode = fStream.str();
+		geometryCode = gStream.str();
+
+
+
+		const char* vertexShader = vertexCode.c_str();
+		const char* fragmentShader = fragmentCode.c_str();
+		const char* geometryShader = geometryCode.c_str();
+
+		unsigned int vertex, fragment, geometry;
+		vertex = glCreateShader(GL_VERTEX_SHADER);
+		glShaderSource(vertex, 1, &vertexShader, NULL);
+		glCompileShader(vertex);
+
+		fragment = glCreateShader(GL_FRAGMENT_SHADER);
+		glShaderSource(fragment, 1, &fragmentShader, NULL);
+		glCompileShader(fragment);
+
+		geometry = glCreateShader(GL_GEOMETRY_SHADER);
+		glShaderSource(geometry,1,&geometryShader,NULL);
+		glCompileShader(geometry);
+
+		
+		checkShaderError(vertex, "VERTEX");
+		checkShaderError(fragment, "FRAGMENT");
+		checkShaderError(geometry, "GEOMETRY");
+
+		ID = glCreateProgram();
+		glAttachShader(ID, vertex);
+		glAttachShader(ID, fragment);
+		glAttachShader(ID, geometry);
 		glLinkProgram(ID);
 		checkShaderError(ID, "PROGRAM");
 	}

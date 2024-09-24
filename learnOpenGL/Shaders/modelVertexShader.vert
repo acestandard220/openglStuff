@@ -5,14 +5,12 @@ layout (location = 2) in vec2 aTexCoords;
 
 out vec2 TexCoords;
 
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 proj;
+uniform mat4 u_mvp;
 
 uniform vec3 color;
 
 void main()
 {
     TexCoords = aTexCoords;    
-    gl_Position = proj * view * model * vec4(aPos, 1.0);
+    gl_Position = u_mvp * vec4(aPos, 1.0);
 }
