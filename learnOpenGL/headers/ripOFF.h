@@ -51,9 +51,9 @@ private:
 		viewMatrix = glm::lookAt(camPos, camPos + camFront, camUp);
 		projMatrix = glm::perspective(glm::radians(45.0f), 500 / 300.0f, 0.1f, 1000.0f);
 
-		shader.setUniformMatrix(*"model", modelMatrix);
-		shader.setUniformMatrix(*"view", viewMatrix);
-		shader.setUniformMatrix(*"proj", projMatrix);
+		shader.setUniformMatrix("model", modelMatrix);
+		shader.setUniformMatrix("view", viewMatrix);
+		shader.setUniformMatrix("proj", projMatrix);
 
 	}
 	float vertex[108] = {

@@ -13,11 +13,11 @@
 class Platform
 {
 	public:
-		unsigned int texture;
+		
 		Platform(const char* texturePath)
 		{		
-			unsigned int vBuffer;
-			unsigned int EBO;
+			glGenVertexArrays(1, &VAO);
+			glBindVertexArray(VAO);
 			
 			glGenBuffers(1, &vBuffer);
 			glGenBuffers(1, &EBO);
@@ -38,9 +38,7 @@ class Platform
 			glBindTexture(GL_TEXTURE_2D, texture);
 			
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-		
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);	
 
 			int height, width, nChannel;
 			stbi_set_flip_vertically_on_load(true);
@@ -52,7 +50,7 @@ class Platform
 			}else{std::cout<<"NOPE, couldn't load the texture."; }
 			stbi_image_free(data);
 
-
+			glBindVertexArray(0);
 		}
 
 		void transMatrix(Shader& shader, glm::vec3 camPos, glm::vec3 camFront, glm::vec3 camUp)
@@ -62,16 +60,18 @@ class Platform
 			glm::mat4 projMatrix(1.0f);
 
 			modelMatrix = glm::rotate(modelMatrix,glm::radians(90.0f),glm::vec3(1.0f,0.0f,0.0f));
-			modelMatrix = glm::scale(modelMatrix, glm::vec3(1.1f));
-			modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, -1.0f));
+			modelMatrix = glm::scale(modelMatrix, glm::vec3(2.1f));
+			modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 1.0f));
 			viewMatrix = glm::lookAt(camPos,camFront+camPos, camUp);
 			projMatrix = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 1000.0f);
 
 			shader.use();
-			shader.setUniformMatrix(*"model", modelMatrix);
-			shader.setUniformMatrix(*"view", viewMatrix);
-			shader.setUniformMatrix(*"proj", projMatrix);
-			shader.setInt(*"tex", texture);
+			shader.setUniformMatrix("model", modelMatrix);
+			shader.setUniformMatrix("view", viewMatrix);
+			shader.setUniformMatrix("proj", projMatrix);
+
+			shader.setUniformMatrix("u_mvp", projMatrix * viewMatrix * modelMatrix);
+			
 
 
 		}
@@ -85,20 +85,24 @@ class Platform
 			projMatrix = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 1000.0f);
 
 			shader.use();
-			shader.setUniformMatrix(*"model", modelMatrix);
-			shader.setUniformMatrix(*"view", viewMatrix);
-			shader.setUniformMatrix(*"proj", projMatrix);
-			shader.setInt(*"tex", texture);
+			shader.setUniformMatrix("model", modelMatrix);
+			shader.setUniformMatrix("view", viewMatrix);
+			shader.setUniformMatrix("proj", projMatrix);
 
 
 		}
-		void draw(Shader& shader)
+		void Draw(Shader& shader)
 		{
 			shader.use();
+			glBindVertexArray(VAO);
 			glBindTexture(GL_TEXTURE_2D, texture);
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		} 
 	private:
+		unsigned int vBuffer;
+		unsigned int EBO;
+		unsigned int VAO;
+		unsigned int texture;
 		float vertex[12+8] = {
 				 0.5f,  0.5f, 0.0f,  1.0f, 1.0f,
 				 0.5f, -0.5f, 0.0f,  1.0f, 0.0f,

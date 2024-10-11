@@ -5,7 +5,6 @@
 class Point {
 
 public:
-	unsigned int vArray;
 	Point()
 	{
 		unsigned int vBuffer;
@@ -35,6 +34,7 @@ public:
 	}
 
 private:
+	unsigned int vArray;
 	float vertex[20] = {
 		 -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, // top-left
 	     0.5f,  0.5f, 0.0f, 1.0f, 0.0f, // top-right

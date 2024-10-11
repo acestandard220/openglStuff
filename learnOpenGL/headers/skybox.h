@@ -102,9 +102,9 @@ public:
 		shader.use();
 		glm::mat4 u_mvp = projMatrix * viewMatrix * modelMatrix;
 
-		shader.setUniformMatrix(*"u_mvp", u_mvp);
+		shader.setUniformMatrix("u_mvp", u_mvp);
 
-		shader.setInt(*"texture", texture);
+		shader.setInt("texture", texture);
 
 		
 	}

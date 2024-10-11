@@ -2,21 +2,17 @@
 #include <GLFW/glfw3.h>
 #include <headers/Shader.h>
 #include <headers/cubeRender.h>
-#include <headers/skybox.h>
+//#include <headers/skybox.h>
 #include <headers/platform.h>
 #include <stb_image.h>
 #include <headers/model.h>
 #include <headers/paths.h>
-#include <headers/ripOFF.h>
-#include <imGUI/imgui.h>
-#include <imGUI/imgui_impl_glfw_gl3.h>
 #include <vector>
-#include "headers/transfoformations.h"
+//#include "headers/transfoformations.h"
 #include <string>
-#include "headers/pointRenderer.h"
-
-#define SCRN_HEIGHT  800
-#define SCRN_WIDTH  800
+//#include "headers/pointRenderer.h"
+int SCRN_HEIGHT = 800;
+int SCRN_WIDTH = 800;
 
 /// <TODO>
 /// 
@@ -32,6 +28,36 @@
 ///  Addition of along a specific axis transformation support 
 /// Addition of a struct for matrixes that can be passed to the form renderers
 /// </TODO>
+
+int pixels[50 * 50];
+std::vector<float> pix(SCRN_HEIGHT* SCRN_WIDTH*4 );
+
+void WriteToPPM(GLFWwindow* window)
+{
+	glReadBuffer(GL_FRONT);
+	glfwGetFramebufferSize(window, &SCRN_WIDTH, &SCRN_HEIGHT);
+	pix.resize(SCRN_HEIGHT * SCRN_WIDTH);
+	glReadPixels(0, 0, SCRN_WIDTH, SCRN_HEIGHT, GL_RGB, GL_FLOAT, pix.data());
+		
+	
+
+
+	std::fstream v;
+	v.open("out.ppm");
+	v << "P3\n";
+	v << 800 <<" "<< 800 << "\n";
+	v << 1;
+	v << "\n";
+
+	for (int i = 0; i < 800 * 800 ; i++)
+	{
+		v << pix[i]<<std::endl;
+
+	}
+	
+	
+	//v << stream.str();
+}
 
 bool paneFlag = false;
 
@@ -104,6 +130,7 @@ int main()
 	if (!glfwInit())
 		return -1;
 
+	glfwWindowHint(GL_SAMPLES, 4);
 	GLFWwindow* window = glfwCreateWindow(SCRN_WIDTH, SCRN_HEIGHT, "amish", NULL, NULL);
 	glfwMakeContextCurrent(window);
 
@@ -111,143 +138,141 @@ int main()
 	glewInit();
 
 	Shader cubeShader(CUBE_VERTEX_SHADER, CUBE_FRAGMENT_SHADER);
-	Shader skyboxShader(SKYBOX_VERTEX_SHADER, SKYBOX_FRAGMENT_SHADER);
+	//Shader skyboxShader(SKYBOX_VERTEX_SHADER, SKYBOX_FRAGMENT_SHADER);
 	Shader platformShader(PLATFORM_VERTEX_SHADER, PLATFORM_FRAGMENT_SHADER);
-	Shader scaledShader(SCALED_CUBE_VERTEX_SHADER, SCALED_CUBE_FRAGMENT_SHADER);
+	//Shader scaledShader(SCALED_CUBE_VERTEX_SHADER, SCALED_CUBE_FRAGMENT_SHADER);
 	Shader modelShader(MODEL_VERTEX_SHADER, MODEL_FRAGMENT_SHADER);
-	Shader pointShader(POINT_VERTEX_SHADER,POINT_FRAGMENT_SHADER,POINT_GEOMETRY_SHADER);
+	Shader depthShader(DEPTH_VERTEX_SHADER, DEPTH_FRAGMENT_SHADER);
+	//Shader pointShader(POINT_VERTEX_SHADER,POINT_FRAGMENT_SHADER,POINT_GEOMETRY_SHADER);
 
-	Skybox skybox(loadCubemap(faces));
-	Cube cube(loadCubemap(faces));
-	Cube c(WORN_PLANKS);
-	Cube outline;
+	//Skybox skybox(loadCubemap(faces));
 
-	Point p;
-	
-	
-	Platform g(WORN_PLANKS);
+	Cube cube(PAINTED_CONCRETE);
+	//Model Blender_Model(SCANI);
+	//Model model(SCANI);
 
 	glEnable(GL_DEPTH_TEST);
-
-	ImGui::CreateContext();
-	ImGui_ImplGlfwGL3_Init(window, true);
+	glEnable(GL_MULTISAMPLE);
 
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetMouseButtonCallback(window, mouse_button_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
 	processInput(window);
 
-	bool show_demo_window = true;
-	bool show_another_window = false;
-	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-	bool rot = false;
-	glm::vec3 translation(1.2f, 1.20f, 1.20f);
 
-	glEnable(GL_STENCIL_TEST);
-	//glStencilMask(0xFF);
-	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+	float quad[] = { 
+		// positions   // texCoords
+		-1.0f,  1.0f,  0.0f, 1.0f,
+		-1.0f, -1.0f,  0.0f, 0.0f,
+		 1.0f, -1.0f,  1.0f, 0.0f,
+
+		-1.0f,  1.0f,  0.0f, 1.0f,
+		 1.0f, -1.0f,  1.0f, 0.0f,
+		 1.0f,  1.0f,  1.0f, 1.0f
+	};
+
 	
 
+	
+	
+	unsigned int framebuffer;
+	glGenFramebuffers(1, &framebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+	unsigned int frameTexture;
+	glGenTextures(1, &frameTexture);
+	glBindTexture(GL_TEXTURE_2D, frameTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 800, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, frameTexture, 0);
+
+	unsigned int renderBuferObject;
+	glGenRenderbuffers(1, &renderBuferObject);
+	glBindRenderbuffer(GL_RENDERBUFFER, renderBuferObject);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 800);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBuferObject);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	{
+		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+		return -11;
+	}
+	else {
+		std::cout << "INFO::FRAMEBUFFER:: Framebuffer is complete" << std::endl;
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	
+
+	unsigned int VBO;
+	unsigned int VAO;
+
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quad), quad, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+	glBindVertexArray(0);
+
+	depthShader.use();
+	depthShader.setInt("screenTexture", 0);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	while (!glfwWindowShouldClose(window))
 	{
-
-
-		ImGui_ImplGlfwGL3_NewFrame();
-
-		glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
 		processInput(window);
 
-
-
-		{
-			static float fl = 0.0f;
-			static int counter = 0;
-			ImGui::Text("Editor");
-			ImGui::SliderFloat("float", &fl, 0.0f, 1.0f);
-			ImGui::ColorEdit3("clear color", (float*)&clear_color);
-
-			ImGui::Checkbox("Demo Window", &show_demo_window);
-			ImGui::Checkbox("Another Window", &show_another_window);
-			ImGui::Checkbox("Rotation", &rot);
-			ImGui::SliderFloat3("Translation", &translation.x, 0.0f, 5.0f);
-
-			
-
-
-			if (ImGui::Button("Button"))
-				counter++;
-			ImGui::SameLine();
-			ImGui::Text("counter = %d", counter);
-
-			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-		}
-
-
-		if (show_another_window)
-		{
-			ImGui::Begin("Another Window", &show_another_window);
-			ImGui::Text("Hello from another window!");
-			ImGui::Checkbox("Checket", &show_another_window);
-			if (ImGui::Button("Close Me"))
-				show_another_window = false;
-			ImGui::End();
-		}
-		if (show_demo_window)
-		{
-			ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiCond_FirstUseEver);
-			ImGui::ShowDemoWindow(&show_demo_window);
-		}
-
-		
-
+		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+		glEnable(GL_DEPTH_TEST);
+		glClearColor(1, 1, 1, 1);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glm::mat4 modelMatrix(1.0f);
 		glm::mat4 viewMatrix(1.0f);
 		glm::mat4 projMatrix(1.0f);
-
-		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
-		modelMatrix = glm::scale(modelMatrix, translation);
-	    viewMatrix = glm::mat4(glm::mat3(glm::lookAt(cameraPos, cameraPos + cameraFront,cameraUp)));
-		projMatrix = glm::perspective(glm::radians(45.0f), SCRN_WIDTH /SCRN_HEIGHT + 0.0f, 0.1f, 1000.0f);
+		//modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, -2.0f, -30.0f));
+		modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0, 1, 1));
+		viewMatrix = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+		projMatrix = glm::perspective(glm::radians(45.0f), SCRN_WIDTH / SCRN_HEIGHT + 0.0f, 0.1f, 1000.0f);
+		glm::mat4 u_mvp = projMatrix * viewMatrix * modelMatrix;
+		cubeShader.use();
+		cube.UseDefaultMVP(cubeShader, cameraPos, cameraFront, cameraUp);
+		cube.Draw(cubeShader);
+		glBindVertexArray(0);
 
 		
-		/*
-		skybox.transMatrix(skyboxShader, cameraPos, cameraFront, cameraUp);
-		glDepthMask(GL_FALSE);
-		//skybox.Draw(skyboxShader);
+		glBindFramebuffer(GL_FRAMEBUFFER,0);
+		glClearColor(1, 1, 1, 1);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glDisable(GL_DEPTH_TEST);
 
-		glDepthMask(GL_TRUE);
-		cube.SetMVP(cubeShader,modelMatrix, cameraPos, cameraFront, cameraUp);
-		//cube.Draw(cubeShader);
-
-		glm::mat4 model(1.0f);
-		model = glm::translate(model, glm::vec3(10.0, 1.0, 0.0f));
-		//c.UseDefaultMVP(scaledShader, cameraPos, cameraFront, cameraUp);
-		c.SetMVP(scaledShader, model, cameraPos, cameraFront, cameraUp);
-		//c.Draw(scaledShader);
-		*/
-
-		p.Draw(pointShader);
-	
+		depthShader.use(); 
+		//this is the correct way of using textures
+		//the code below binds the sampler2D variable inn the shader to the texture unit 0
+		depthShader.setInt("screenTexture", 0);
 		
+		glBindVertexArray(VAO);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, frameTexture);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glBindVertexArray(0);		
 
-		ImGui::Render();
-		ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
-		
 		glfwSwapBuffers(window);
+		//WriteToPPM(window);
 		glfwPollEvents();
 	}
-
-	
-
-	ImGui_ImplGlfwGL3_Shutdown();
-	ImGui::DestroyContext();
 	glfwTerminate();
 	return 0;
 }
+
+
+
 
 void processInput(GLFWwindow* window)
 {

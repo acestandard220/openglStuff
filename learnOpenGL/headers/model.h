@@ -16,6 +16,11 @@
 class Model {
 public:
     int texLoad = 0;
+    size_t meshesLoaded = 0;
+    size_t texturesLoaded = 0;
+    size_t totalMeshes = 0;
+    size_t totalTextures = 0;
+
     std::vector<Texture> textures_loaded;
     Model(std::string path)
     {
@@ -51,8 +56,9 @@ private:
     bool loadModel(std::string path)
     {
         Assimp::Importer import;
-        const aiScene * scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
-
+        const aiScene * scene = import.ReadFile(path, aiProcess_Triangulate| aiProcess_PreTransformVertices | aiProcess_FlipUVs);
+   
+    
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
         {
             std::cout << "ERROR::ASSIMP::" << import.GetErrorString() << std::endl;
@@ -116,6 +122,7 @@ private:
             // texture coordinates
             if (mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
             {
+
                 glm::vec2 vec;
                 // a vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't 
                 // use models where a vertex can have multiple texture coordinates so we always take the first set (0).
@@ -135,12 +142,15 @@ private:
                     vector.z = mesh->mBitangents[i].z;
                     vertex.Bitangent = vector;
                 }
+                
             }
             else
                 vertex.TextureCoords = glm::vec2(0.0f, 0.0f);
 
             vertices.push_back(vertex);
         }
+        texLoad += 1;
+        std::cout << "[TEXTURE LOADING]: " << texLoad << std::endl;
         // now wak through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
         for (unsigned int i = 0; i < mesh->mNumFaces; i++)
         {
@@ -163,12 +173,8 @@ private:
         // 4. height maps
         std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
         textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
-        
-        std::cout << textures.size() << "\n";
-        texLoad += 1;
-        std::cout << "[TEXTURE LOADING]: " << texLoad << scene->mNumMaterials<< "\n";
-        
-
+                
+        meshesLoaded += 1;
         // return a mesh object created from the extracted mesh data*/
         return Mesh(vertices, indices, textures);
     }

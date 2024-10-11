@@ -16,6 +16,8 @@
 #define SKYBOX_VERTEX_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\skybox_vertex.vert"
 #define SKYBOX_FRAGMENT_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\skybox_frag.frag"
 
+#define DEPTH_VERTEX_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\depthVertex.vert"
+#define DEPTH_FRAGMENT_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\depthShader.frag"
 
 #define POINT_VERTEX_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\pointVertex.vert"
 #define POINT_FRAGMENT_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\pointFrag.frag"
@@ -28,7 +30,8 @@
 #define SCANI "P:/Projects/VS/learnOpenGL/learnOpenGL/Models/Scaniverse/Scaniverse.obj"
 #define GEAR "P:/Projects/VS/learnOpenGL/learnOpenGL/Models/obj/Gear2.obj"              
 #define FIRE_HYDRANT "P:/Projects/VS/learnOpenGL/Models/learnOpenGL/scene/scene.obj"
-
+#define MONKEY "P:/Projects/VS/learnOpenGL/learnOpenGL/Models/BlenderMonkey/untitled.obj"
+#define BISTRO "C:/Users/User/Desktop/Bistro_v5_2/Bistro OBJ/exterior.obj"
 
 
 #define COAST_SAND "P:/Projects/VS/learnOpenGL/learnOpenGL/Textures/coast_sand_rocks_02_diff_2k.jpg" 

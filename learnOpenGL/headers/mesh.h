@@ -76,15 +76,21 @@ public:
 			
 		}
 
+		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
 		glActiveTexture(GL_TEXTURE0);
+		glBindVertexArray(0);
 	}
 
 private:
 	unsigned int vBuffer;
 	unsigned int EBO;
+	unsigned int VAO;
 	void setup()
 	{
+		glGenVertexArrays(1, &VAO);
+
+		glBindVertexArray(VAO);
 		glGenBuffers(1, &vBuffer);
 		glGenBuffers(1, &EBO);
 
@@ -102,6 +108,7 @@ private:
 		glEnableVertexAttribArray(1);
 		glEnableVertexAttribArray(2);
 		
+		glBindVertexArray(0);
 
 	}
 };

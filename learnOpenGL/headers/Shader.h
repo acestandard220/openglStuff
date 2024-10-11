@@ -106,6 +106,7 @@ public:
 		glAttachShader(ID, geometry);
 		glLinkProgram(ID);
 		checkShaderError(ID, "PROGRAM");
+		free((void*)fragmentShader);
 	}
 	void use() {
 		glUseProgram(ID);
@@ -116,9 +117,9 @@ public:
 		return glGetUniformLocation(this->ID, var);
 	}
 
-	void setUniformMatrix(const char& var, const glm::mat4 value)
+	void setUniformMatrix(const char* var, const glm::mat4 value)
 	{
-		glUniformMatrix4fv(getUniformLocation(&var), 1, GL_FALSE, glm::value_ptr(value));
+		glUniformMatrix4fv(getUniformLocation(var), 1, GL_FALSE, glm::value_ptr(value));
 	}
 	void setVec3(const char var, const glm::vec3 value)
 	{
@@ -128,9 +129,9 @@ public:
 	{
 		glUniform1iv(getUniformLocation(&var), 1, value);
 	}
-	void setInt(const char var, int value)
+	void setInt(const char* var, int value)
 	{
-		glUniform1i(getUniformLocation(&var), value);
+		glUniform1i(getUniformLocation(var), value);
 	}
 
 private:

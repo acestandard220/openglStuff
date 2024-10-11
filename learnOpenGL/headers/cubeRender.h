@@ -9,15 +9,6 @@
 //***********************************************             ATTENTION                *******************************************
 // call one of the transMAtrix functions before using draw.
 
-enum keys {
-	ROTATE = 0,
-	COLOR = 1
-};
-enum colors {
-	RED = 0,
-	YELLOW = 2,
-	GREEN = 3,
-};
 
 enum DEFAULTS {
 	U_MVP
@@ -120,26 +111,24 @@ public:
 	}
 
 
-	void UseDefaultMVP(Shader& shader, glm::vec3 camPos, glm::vec3 camFront, glm::vec3 camUp)
+	void UseDefaultMVP(Shader& shader, glm::vec3& camPos, glm::vec3& camFront, glm::vec3& camUp)
 	{
 		glm::mat4 modelMatrix = 1.0f;
 		glm::mat4 projMatrix = 1.0f;
 		glm::mat4 viewMatrix(1.0f);
 
-		modelMatrix = glm::rotate(modelMatrix, glm::radians(45.0f * (float)glfwGetTime() * rotValue), glm::vec3(0.0f, 1.0f, 0.0f));
-		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
+		//modelMatrix = glm::rotate(modelMatrix, glm::radians(45.0f * (float)glfwGetTime() * rotValue), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, -20.0f));
 		viewMatrix = glm::lookAt(camPos,camPos+camFront,camUp);
 		projMatrix = glm::perspective(glm::radians(45.0f), 500 / 300.0f, 0.1f, 1000.0f);
 
 		shader.use();
 		glm::mat4 u_mvp = projMatrix * viewMatrix * modelMatrix;
 
-		shader.setUniformMatrix(*"u_mvp", u_mvp);
-
-		shader.setInt(*"texture", texture);
+		shader.setUniformMatrix("u_mvp", u_mvp);
 	}
 
-	void SetMVP(Shader& shader, glm::mat4 modelMat, glm::vec3 camPos, glm::vec3 camFront, glm::vec3 camUp)
+	void SetMVP(Shader& shader, glm::mat4 modelMat, glm::vec3& camPos, glm::vec3& camFront, glm::vec3& camUp)
 	{
 		glm::mat4 modelMatrix = modelMat;
 		glm::mat4 projMatrix = 1.0f;
@@ -152,50 +141,22 @@ public:
 		glm::mat4 u_mvp = projMatrix * viewMatrix * modelMatrix;
 
 		shader.use();
-		shader.setUniformMatrix(*"u_mvp", u_mvp);
-		shader.setUniformMatrix(*"model", modelMatrix);
-		shader.setVec3(*"cameraPos", camPos);
-
-		shader.setInt(*"texture", texture);
-	
+		shader.setUniformMatrix("u_mvp", u_mvp);
+		shader.setUniformMatrix("model", modelMatrix);
+		shader.setVec3(*"cameraPos", camPos);	
 	}
 	// call one of the transMAtrix functions before using draw.
 
 	void Draw(Shader& shader)
 	{		
 		shader.use();
+		shader.setInt("text", 0);
+		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glBindVertexArray(vArray);
 		stbi_set_flip_vertically_on_load(true);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
-
-	void Enable(keys key)
-	{
-		if (key == ROTATE)
-		{
-			rotValue = 1;
-		}
-	}
-	void Disable(keys key)
-	{
-		if (key == ROTATE)
-		{
-			rotValue = 0;
-		}
-	}
-	void Enable(keys key, colors color, Shader& shader)
-	{
-		if (key == COLOR)
-		{
-			shader.setVec3(*"color", glm::vec3(0.0f, 1.0f, 0.0f));
-
-		}
-		else {
-			return;
-		}
-	}
-
 
 private:
 
@@ -244,6 +205,4 @@ private:
 	-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
 	-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
 	};
-
-
 };

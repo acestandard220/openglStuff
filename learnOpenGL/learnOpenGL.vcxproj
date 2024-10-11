@@ -133,7 +133,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="headers\ripOFF.h" />
     <ClCompile Include="imGUI\imgui.cpp" />
     <ClCompile Include="imGUI\imgui_demo.cpp" />
     <ClCompile Include="imGUI\imgui_draw.cpp" />
@@ -143,14 +142,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers\cubeRender.h" />
+    <ClInclude Include="headers\lightCaster.h" />
     <ClInclude Include="headers\mesh.h" />
     <ClInclude Include="headers\model.h" />
     <ClInclude Include="headers\paths.h" />
     <ClInclude Include="headers\platform.h" />
-    <ClInclude Include="headers\pointRenderer.h" />
     <ClInclude Include="headers\Shader.h" />
-    <ClInclude Include="headers\skybox.h" />
-    <ClInclude Include="headers\transfoformations.h" />
     <ClInclude Include="imGUI\imconfig.h" />
     <ClInclude Include="imGUI\imgui.h" />
     <ClInclude Include="imGUI\imgui_impl_glfw_gl3.h" />
@@ -162,12 +159,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="assimp-vc140-mt.dll" />
+    <None Include="Shaders\depthShader.frag" />
+    <None Include="Shaders\depthVertex.vert" />
     <None Include="Shaders\cube_FragmentShader.frag" />
     <None Include="Shaders\cube_VertexShader.vert" />
     <None Include="Shaders\modelFragmentShader.frag" />
     <None Include="Shaders\modelVertexShader.vert" />
-    <None Include="Shaders\model_FragmentShader.frag" />
-    <None Include="Shaders\model_VertexShader.vert" />
     <None Include="Shaders\outline_fragment.frag" />
     <None Include="Shaders\outline_Vertex.vert" />
     <None Include="Shaders\platform_FragmentShader.frag" />
