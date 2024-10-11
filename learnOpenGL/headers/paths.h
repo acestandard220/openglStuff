@@ -16,8 +16,12 @@
 #define SKYBOX_VERTEX_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\skybox_vertex.vert"
 #define SKYBOX_FRAGMENT_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\skybox_frag.frag"
 
+#define QUAD_VERTEX_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\quad.vert"
+#define QUAD_FRAGMENT_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\quadf.frag"
+
 #define DEPTH_VERTEX_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\depthVertex.vert"
-#define DEPTH_FRAGMENT_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\depthShader.frag"
+#define DEPTH_FRAGMENT_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\depthFragment.frag"
+
 
 #define POINT_VERTEX_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\pointVertex.vert"
 #define POINT_FRAGMENT_SHADER "P:\\Projects\\VS\\learnOpenGL\\learnOpenGL\\Shaders\\pointFrag.frag"

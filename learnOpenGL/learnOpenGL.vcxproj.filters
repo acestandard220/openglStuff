@@ -96,7 +96,9 @@
     <None Include="Shaders\pointVertex.vert" />
     <None Include="Shaders\pointFrag.frag" />
     <None Include="Shaders\pointGeo.geom" />
+    <None Include="Shaders\quad.vert" />
+    <None Include="Shaders\quadf.frag" />
     <None Include="Shaders\depthVertex.vert" />
-    <None Include="Shaders\depthShader.frag" />
+    <None Include="Shaders\depthFragment.frag" />
   </ItemGroup>
 </Project>

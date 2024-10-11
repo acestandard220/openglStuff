@@ -142,14 +142,16 @@ int main()
 	Shader platformShader(PLATFORM_VERTEX_SHADER, PLATFORM_FRAGMENT_SHADER);
 	//Shader scaledShader(SCALED_CUBE_VERTEX_SHADER, SCALED_CUBE_FRAGMENT_SHADER);
 	Shader modelShader(MODEL_VERTEX_SHADER, MODEL_FRAGMENT_SHADER);
+	Shader quadShader(QUAD_VERTEX_SHADER, QUAD_FRAGMENT_SHADER);
 	Shader depthShader(DEPTH_VERTEX_SHADER, DEPTH_FRAGMENT_SHADER);
 	//Shader pointShader(POINT_VERTEX_SHADER,POINT_FRAGMENT_SHADER,POINT_GEOMETRY_SHADER);
 
 	//Skybox skybox(loadCubemap(faces));
 
+
 	Cube cube(PAINTED_CONCRETE);
-	//Model Blender_Model(SCANI);
-	//Model model(SCANI);
+	Platform platform(COAST_SAND);
+
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_MULTISAMPLE);
@@ -158,8 +160,6 @@ int main()
 	glfwSetMouseButtonCallback(window, mouse_button_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
 	processInput(window);
-
-
 
 	float quad[] = { 
 		// positions   // texCoords
@@ -171,30 +171,27 @@ int main()
 		 1.0f, -1.0f,  1.0f, 0.0f,
 		 1.0f,  1.0f,  1.0f, 1.0f
 	};
-
-	
-
-	
 	
 	unsigned int framebuffer;
 	glGenFramebuffers(1, &framebuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
-	unsigned int frameTexture;
-	glGenTextures(1, &frameTexture);
-	glBindTexture(GL_TEXTURE_2D, frameTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 800, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	unsigned int depthMap;
+	glGenTextures(1, &depthMap);
+	glBindTexture(GL_TEXTURE_2D, depthMap);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 800, 800, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, frameTexture, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap , 0);
+	glDrawBuffer(GL_NONE);  glReadBuffer(GL_NONE);
 
 	unsigned int renderBuferObject;
 	glGenRenderbuffers(1, &renderBuferObject);
 	glBindRenderbuffer(GL_RENDERBUFFER, renderBuferObject);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 800);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBuferObject);
+	//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBuferObject);
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 	{
@@ -222,17 +219,48 @@ int main()
 	glEnableVertexAttribArray(1);
 	glBindVertexArray(0);
 
-	depthShader.use();
-	depthShader.setInt("screenTexture", 0);
+	quadShader.use();
+	quadShader.setInt("screenTexture", 0);
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glm::vec3 lightPos(-2.0f, 2.0f, -1.0f);
+
 	while (!glfwWindowShouldClose(window))
 	{
 		processInput(window);
-
+		
+	
+		
 		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 		glEnable(GL_DEPTH_TEST);
 		glClearColor(1, 1, 1, 1);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		glm::mat4 lightProjection, lightView;
+		glm::mat4 lightSpaceMatrix;
+		float near_plane = 1.0f, far_plane = 7.5f;
+		lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+		lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+		lightSpaceMatrix = lightProjection * lightView;
+
+		depthShader.use();
+		depthShader.setUniformMatrix("lightSpaceMatrx", lightSpaceMatrix);
+		cube.Draw(depthShader);
+		glm::mat4 model(1.0);
+		model = glm::scale(model, glm::vec3(10.0f));
+		model = glm::translate(model, glm::vec3(0.0,-0.2,0.0));
+		model = glm::rotate(model, glm::radians(90.0f),glm::vec3(1.0,0.0,0.0));
+		depthShader.setUniformMatrix("lightSpaceMatrx", lightProjection * lightView *model);
+		platform.Draw(depthShader);
+
+
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glEnable(GL_DEPTH_TEST);
+		glClearColor(1, 1, 1, 1);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		
+
+		/*
 		glm::mat4 modelMatrix(1.0f);
 		glm::mat4 viewMatrix(1.0f);
 		glm::mat4 projMatrix(1.0f);
@@ -241,27 +269,37 @@ int main()
 		viewMatrix = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 		projMatrix = glm::perspective(glm::radians(45.0f), SCRN_WIDTH / SCRN_HEIGHT + 0.0f, 0.1f, 1000.0f);
 		glm::mat4 u_mvp = projMatrix * viewMatrix * modelMatrix;
+
 		cubeShader.use();
-		cube.UseDefaultMVP(cubeShader, cameraPos, cameraFront, cameraUp);
+		cubeShader.setUniformMatrix("u_mvp", u_mvp);		
+		glBindVertexArray(VAO);
 		cube.Draw(cubeShader);
 		glBindVertexArray(0);
 
+		platform.transMatrix(cubeShader, cameraPos, cameraFront, cameraUp);
+		platform.Draw(cubeShader);
 		
-		glBindFramebuffer(GL_FRAMEBUFFER,0);
-		glClearColor(1, 1, 1, 1);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glDisable(GL_DEPTH_TEST);
+		
+		*/
 
-		depthShader.use(); 
+
+
+
+
+
+		///*
+		quadShader.use(); 
 		//this is the correct way of using textures
 		//the code below binds the sampler2D variable inn the shader to the texture unit 0
-		depthShader.setInt("screenTexture", 0);
+		quadShader.setInt("screenTexture", 0);
 		
 		glBindVertexArray(VAO);
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, frameTexture);
+		glBindTexture(GL_TEXTURE_2D, depthMap);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
-		glBindVertexArray(0);		
+		glBindVertexArray(0);	
+		
+		//*/
 
 		glfwSwapBuffers(window);
 		//WriteToPPM(window);
@@ -270,9 +308,6 @@ int main()
 	glfwTerminate();
 	return 0;
 }
-
-
-
 
 void processInput(GLFWwindow* window)
 {

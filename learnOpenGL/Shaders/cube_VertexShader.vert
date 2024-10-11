@@ -5,9 +5,10 @@ layout (location =2) in vec2 aTex;
 
 uniform mat4 u_mvp;
 uniform mat4 model;
+out vec2 textCoord;
 
 void main()
 {
-	
+	textCoord = aTex;
 	gl_Position =  u_mvp * vec4(aPos,1.0f);
 }
