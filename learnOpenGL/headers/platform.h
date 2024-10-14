@@ -81,9 +81,9 @@ class Platform
 			glm::mat4 viewMatrix(1.0f);
 			glm::mat4 projMatrix(1.0f);
 
-			modelMatrix = glm::scale(modelMatrix, glm::vec3(10.0f));
-			modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, -0.2f, 0.0f));
-			modelMatrix = glm::rotate(modelMatrix,glm::radians(90.0f),glm::vec3(1.0f,0.0f,0.0f));
+			modelMatrix = glm::scale(modelMatrix, glm::vec3(30.0f));
+			modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0, -0.05, 0.0));
+			modelMatrix = glm::rotate(modelMatrix, glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
 			viewMatrix = glm::lookAt(camPos,camFront+camPos, camUp);
 			projMatrix = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 1000.0f);
 
@@ -110,6 +110,7 @@ class Platform
 			shader.setUniformMatrix("model", modelMatrix);
 			shader.setUniformMatrix("view", viewMatrix);
 			shader.setUniformMatrix("proj", projMatrix);
+			shader.setInt("text", 1);
 
 
 		}
@@ -117,6 +118,7 @@ class Platform
 		{
 			shader.use();
 			glBindVertexArray(VAO);
+			glBindTexture(GL_TEXTURE1, texture);
 			glBindTexture(GL_TEXTURE_2D, texture);
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		} 

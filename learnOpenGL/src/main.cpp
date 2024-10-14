@@ -161,6 +161,19 @@ int main()
 	glfwSetCursorPosCallback(window, mouse_callback);
 	processInput(window);
 
+	int width, height, nrChan;
+	unsigned int normalTexture;
+	glGenTextures(1, &normalTexture);
+	glBindTexture(GL_TEXTURE_2D, normalTexture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	unsigned char* dat = stbi_load("C:/Users/User/Downloads/painted_concrete_nor_gl_2k.jpg",&width,&height,&nrChan,0);
+	if (dat) {
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, dat);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else { std::cout << "Could not load Normal Texture\n"; }
+	stbi_image_free(dat);
 	float quad[] = { 
 		// positions   // texCoords
 		-1.0f,  1.0f,  0.0f, 1.0f,
@@ -179,7 +192,7 @@ int main()
 	unsigned int depthMap;
 	glGenTextures(1, &depthMap);
 	glBindTexture(GL_TEXTURE_2D, depthMap);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 800, 800, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -190,7 +203,7 @@ int main()
 	unsigned int renderBuferObject;
 	glGenRenderbuffers(1, &renderBuferObject);
 	glBindRenderbuffer(GL_RENDERBUFFER, renderBuferObject);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 800);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 1024, 1024);
 	//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBuferObject);
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
@@ -222,7 +235,9 @@ int main()
 	quadShader.use();
 	quadShader.setInt("screenTexture", 0);
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	glm::vec3 lightPos(-2.0f, 2.0f, -1.0f);
+	//glm::vec3 lightPos(-2.0f, 2.0f, -1.0f);
+	glm::vec3 lightPos = glm::vec3(1.2f, 1.0f, 2.0f);
+	
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -241,18 +256,19 @@ int main()
 		lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
 		lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
 		lightSpaceMatrix = lightProjection * lightView;
+		glViewport(0, 0, 1024, 1024);
 
 		depthShader.use();
 		depthShader.setUniformMatrix("lightSpaceMatrx", lightSpaceMatrix);
 		cube.Draw(depthShader);
 		glm::mat4 model(1.0);
-		model = glm::scale(model, glm::vec3(10.0f));
-		model = glm::translate(model, glm::vec3(0.0,-0.2,0.0));
+		model = glm::scale(model, glm::vec3(30.0f));
+		model = glm::translate(model, glm::vec3(0.0,-0.05,0.0));
 		model = glm::rotate(model, glm::radians(90.0f),glm::vec3(1.0,0.0,0.0));
 		depthShader.setUniformMatrix("lightSpaceMatrx", lightProjection * lightView *model);
 		platform.Draw(depthShader);
 
-
+		
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glEnable(GL_DEPTH_TEST);
@@ -260,34 +276,48 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 
-		/*
+		
 		glm::mat4 modelMatrix(1.0f);
 		glm::mat4 viewMatrix(1.0f);
 		glm::mat4 projMatrix(1.0f);
 		//modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, -2.0f, -30.0f));
-		modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0, 1, 1));
+		modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0));
 		viewMatrix = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 		projMatrix = glm::perspective(glm::radians(45.0f), SCRN_WIDTH / SCRN_HEIGHT + 0.0f, 0.1f, 1000.0f);
 		glm::mat4 u_mvp = projMatrix * viewMatrix * modelMatrix;
 
+		glViewport(0, 0, 1024, 1024);
 		cubeShader.use();
-		cubeShader.setUniformMatrix("u_mvp", u_mvp);		
+		cubeShader.setInt("shadowMap", 2);
+		cubeShader.setUniformMatrix("model", modelMatrix);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, depthMap);
+		platform.transMatrix(platformShader, cameraPos, cameraFront, cameraUp);
+		platform.Draw(platformShader);
+
+		cubeShader.use();
+		cubeShader.setUniformMatrix("u_mvp", u_mvp);
+		cubeShader.setVec3(*"lightPos", lightPos);
+		cubeShader.setUniformMatrix("model", modelMatrix);
+		cubeShader.setVec3(*"viewPos", cameraPos);
+		cubeShader.setInt("shadowMap", 2);
+		cubeShader.setInt("normalTexture", 5);
+		glActiveTexture(GL_TEXTURE5);
+		glBindTexture(GL_TEXTURE_2D, normalTexture);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, depthMap);
 		glBindVertexArray(VAO);
 		cube.Draw(cubeShader);
 		glBindVertexArray(0);
 
-		platform.transMatrix(cubeShader, cameraPos, cameraFront, cameraUp);
-		platform.Draw(cubeShader);
 		
-		
-		*/
 
 
 
 
 
 
-		///*
+		/*
 		quadShader.use(); 
 		//this is the correct way of using textures
 		//the code below binds the sampler2D variable inn the shader to the texture unit 0
