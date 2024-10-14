@@ -118,7 +118,8 @@ class Platform
 		{
 			shader.use();
 			glBindVertexArray(VAO);
-			glBindTexture(GL_TEXTURE1, texture);
+			shader.setInt("diffuseTexture", 0);
+			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, texture);
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		} 

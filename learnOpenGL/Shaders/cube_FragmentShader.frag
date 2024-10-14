@@ -1,7 +1,7 @@
 #version 330 core
 out vec4 FragColor;
 
-uniform sampler2D text;
+uniform sampler2D diffuseTexture;
 uniform sampler2D shadowMap;
 uniform sampler2D normalTexture;
 uniform vec3 viewPos;
@@ -51,7 +51,7 @@ void main()
 
 	float shad = Shadow(fs_in.FragLighSpacePos);
 
-	vec3 colour = texture(text, fs_in.textCoord).rgb;
+	vec3 colour = texture(diffuseTexture, fs_in.textCoord).rgb;
 	vec3 result = (ambient +(1.0-shad)* diffuse +specular)* colour;
 	FragColor = vec4(result,1.0);
 

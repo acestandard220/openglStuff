@@ -15,6 +15,10 @@ enum DEFAULTS {
 };
 
 bool flag = false;
+struct TextureDetails {
+	const char* diffuse_path;
+	const char* normal_path;
+};
 
 class Cube
 {
@@ -23,9 +27,11 @@ public:
 	bool rotate = false;
 	float rotValue = 0;
 
+	unsigned int diffTexture;
+	unsigned int norTexture;
 	unsigned int texture;
 	unsigned int vArray;
-	Cube(const char* texture_Path)
+	Cube(TextureDetails texDetails)
 	{
 		unsigned int vBuffer;
 		
@@ -48,8 +54,8 @@ public:
 
 		
 
-		glGenTextures(1, &texture);
-		glBindTexture(GL_TEXTURE_2D, texture);
+		glGenTextures(1, &diffTexture);
+		glBindTexture(GL_TEXTURE_2D, diffTexture);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -57,24 +63,48 @@ public:
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		int width, height, nrChannels;
+		int diffuse_width, diffuse_height, diffuse_nrChannels;
 		stbi_set_flip_vertically_on_load(true);
-		unsigned char* data = stbi_load(texture_Path, &width, &height, &nrChannels, 0);
-		if (data)
+		unsigned char* diffuse_data = stbi_load(texDetails.diffuse_path, &diffuse_width, &diffuse_height, &diffuse_nrChannels, 0);
+		if (diffuse_data)
 		{
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, diffuse_width, diffuse_height, 0, GL_RGB, GL_UNSIGNED_BYTE, diffuse_data);
 			glGenerateMipmap(GL_TEXTURE_2D);
 		}
 		else
 		{
 			std::cout << "Failed to load texture" << std::endl;
 		}
-		stbi_image_free(data);
+		stbi_image_free(diffuse_data);
+
+		glGenTextures(1, &norTexture);
+		glBindTexture(GL_TEXTURE_2D, norTexture);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		int normal_width, normal_height, normal_nrChannels;
+		stbi_set_flip_vertically_on_load(true);
+		unsigned char* normal_data = stbi_load(texDetails.normal_path, &normal_width, &normal_height, &normal_nrChannels, 0);
+		if (normal_data)
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, normal_width, normal_height, 0, GL_RGB, GL_UNSIGNED_BYTE, normal_data);
+			glGenerateMipmap(GL_TEXTURE_2D);
+		}
+		else
+		{
+			std::cout << "Failed to load texture" << std::endl;
+		}
+		stbi_image_free(normal_data);
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 		
 
 	}
+	//For the skybox
 	Cube(unsigned int textureID) : texture(textureID)
 	{
 		unsigned int vBuffer;
@@ -158,9 +188,12 @@ public:
 	void Draw(Shader& shader)
 	{		
 		shader.use();
-		shader.setInt("text", 0);
+		shader.setInt("diffuseTexture", 0);
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture);
+		glBindTexture(GL_TEXTURE_2D, diffTexture);
+		shader.setInt("normalTexture", 1);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, norTexture);
 		glBindVertexArray(vArray);
 		stbi_set_flip_vertically_on_load(true);
 		glDrawArrays(GL_TRIANGLES, 0, 36);

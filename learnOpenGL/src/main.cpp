@@ -148,8 +148,11 @@ int main()
 
 	//Skybox skybox(loadCubemap(faces));
 
+	TextureDetails details;
+	details.diffuse_path = "C:/Users/User/Downloads/castle_brick_02_red_2k/textures/castle_brick_02_red_diff_2k.jpg";
+	details.normal_path = "C:/Users/User/Downloads/castle_brick_02_red_2k/textures/castle_brick_02_red_nor_gl_2k.jpg";
 
-	Cube cube(PAINTED_CONCRETE);
+	Cube cube(details);
 	Platform platform(COAST_SAND);
 
 
@@ -161,19 +164,7 @@ int main()
 	glfwSetCursorPosCallback(window, mouse_callback);
 	processInput(window);
 
-	int width, height, nrChan;
-	unsigned int normalTexture;
-	glGenTextures(1, &normalTexture);
-	glBindTexture(GL_TEXTURE_2D, normalTexture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	unsigned char* dat = stbi_load("C:/Users/User/Downloads/painted_concrete_nor_gl_2k.jpg",&width,&height,&nrChan,0);
-	if (dat) {
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, dat);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else { std::cout << "Could not load Normal Texture\n"; }
-	stbi_image_free(dat);
+	
 	float quad[] = { 
 		// positions   // texCoords
 		-1.0f,  1.0f,  0.0f, 1.0f,
@@ -301,9 +292,6 @@ int main()
 		cubeShader.setUniformMatrix("model", modelMatrix);
 		cubeShader.setVec3(*"viewPos", cameraPos);
 		cubeShader.setInt("shadowMap", 2);
-		cubeShader.setInt("normalTexture", 5);
-		glActiveTexture(GL_TEXTURE5);
-		glBindTexture(GL_TEXTURE_2D, normalTexture);
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, depthMap);
 		glBindVertexArray(VAO);
