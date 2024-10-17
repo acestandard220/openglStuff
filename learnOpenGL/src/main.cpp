@@ -149,14 +149,15 @@ int main()
 		
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glEnable(GL_DEPTH_TEST);
-		glClearColor(1, 1, 1, 1);
+		glClearColor(0, 0, 0, 1);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 		glm::mat4 modelMatrix(1.0f);
 		glm::mat4 viewMatrix(1.0f);
 		glm::mat4 projMatrix(1.0f);
 		//modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, -2.0f, -30.0f));
-		modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0));
+		modelMatrix = glm::scale(modelMatrix, glm::vec3(2.0));
+		modelMatrix = glm::rotate(modelMatrix, glm::radians((float)glfwGetTime()*8), glm::vec3(1.0, 1.0, 1.0));
 		viewMatrix = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 		projMatrix = glm::perspective(glm::radians(45.0f), (float)SCRN_WIDTH / SCRN_HEIGHT + 0.0f, 0.1f, 1000.0f);
 		glm::mat4 u_mvp = projMatrix * viewMatrix * modelMatrix;
@@ -167,7 +168,9 @@ int main()
 	
 
 		modelShader.use();
+		modelShader.setUniformMatrix("model", modelMatrix);
 		modelShader.setUniformMatrix("u_mvp", u_mvp);
+		modelShader.setVec3(*"viewPos", cameraPos);
 		model.Draw(modelShader);
 
 		
