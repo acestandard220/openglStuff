@@ -29,35 +29,6 @@ int SCRN_WIDTH = 800;
 /// Addition of a struct for matrixes that can be passed to the form renderers
 /// </TODO>
 
-int pixels[50 * 50];
-std::vector<float> pix(SCRN_HEIGHT* SCRN_WIDTH*4 );
-
-void WriteToPPM(GLFWwindow* window)
-{
-	glReadBuffer(GL_FRONT);
-	glfwGetFramebufferSize(window, &SCRN_WIDTH, &SCRN_HEIGHT);
-	pix.resize(SCRN_HEIGHT * SCRN_WIDTH);
-	glReadPixels(0, 0, SCRN_WIDTH, SCRN_HEIGHT, GL_RGB, GL_FLOAT, pix.data());
-		
-	
-
-
-	std::fstream v;
-	v.open("out.ppm");
-	v << "P3\n";
-	v << 800 <<" "<< 800 << "\n";
-	v << 1;
-	v << "\n";
-
-	for (int i = 0; i < 800 * 800 ; i++)
-	{
-		v << pix[i]<<std::endl;
-
-	}
-	
-	
-	//v << stream.str();
-}
 
 bool paneFlag = false;
 
@@ -148,13 +119,9 @@ int main()
 
 	//Skybox skybox(loadCubemap(faces));
 
-	TextureDetails details;
-	details.diffuse_path = "C:/Users/User/Downloads/castle_brick_02_red_2k/textures/castle_brick_02_red_diff_2k.jpg";
-	details.normal_path = "C:/Users/User/Downloads/castle_brick_02_red_2k/textures/castle_brick_02_red_nor_gl_2k.jpg";
 
-	Cube cube(details);
-	Platform platform(COAST_SAND);
-
+	
+	Model model("C:/Users/User/Downloads/halloween_pumpkin_tim_burton_style/hallowen_pum.obj");
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_MULTISAMPLE);
@@ -165,64 +132,10 @@ int main()
 	processInput(window);
 
 	
-	float quad[] = { 
-		// positions   // texCoords
-		-1.0f,  1.0f,  0.0f, 1.0f,
-		-1.0f, -1.0f,  0.0f, 0.0f,
-		 1.0f, -1.0f,  1.0f, 0.0f,
 
-		-1.0f,  1.0f,  0.0f, 1.0f,
-		 1.0f, -1.0f,  1.0f, 0.0f,
-		 1.0f,  1.0f,  1.0f, 1.0f
-	};
-	
-	unsigned int framebuffer;
-	glGenFramebuffers(1, &framebuffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-
-	unsigned int depthMap;
-	glGenTextures(1, &depthMap);
-	glBindTexture(GL_TEXTURE_2D, depthMap);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap , 0);
-	glDrawBuffer(GL_NONE);  glReadBuffer(GL_NONE);
-
-	unsigned int renderBuferObject;
-	glGenRenderbuffers(1, &renderBuferObject);
-	glBindRenderbuffer(GL_RENDERBUFFER, renderBuferObject);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 1024, 1024);
-	//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBuferObject);
-
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-	{
-		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
-		return -11;
-	}
-	else {
-		std::cout << "INFO::FRAMEBUFFER:: Framebuffer is complete" << std::endl;
-	}
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	
 
-	unsigned int VBO;
-	unsigned int VAO;
-
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(quad), quad, GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-	glBindVertexArray(0);
-
+	
 	quadShader.use();
 	quadShader.setInt("screenTexture", 0);
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -234,39 +147,10 @@ int main()
 	{
 		processInput(window);
 		
-	
-		
-		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-		glEnable(GL_DEPTH_TEST);
-		glClearColor(1, 1, 1, 1);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		glm::mat4 lightProjection, lightView;
-		glm::mat4 lightSpaceMatrix;
-		float near_plane = 1.0f, far_plane = 7.5f;
-		lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-		lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
-		lightSpaceMatrix = lightProjection * lightView;
-		glViewport(0, 0, SCRN_WIDTH,SCRN_HEIGHT);
-
-		depthShader.use();
-		depthShader.setUniformMatrix("lightSpaceMatrx", lightSpaceMatrix);
-		cube.Draw(depthShader);
-		glm::mat4 model(1.0);
-		model = glm::scale(model, glm::vec3(30.0f));
-		model = glm::translate(model, glm::vec3(0.0,-0.05,0.0));
-		model = glm::rotate(model, glm::radians(90.0f),glm::vec3(1.0,0.0,0.0));
-		depthShader.setUniformMatrix("lightSpaceMatrx", lightProjection * lightView *model);
-		platform.Draw(depthShader);
-
-		
-
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glEnable(GL_DEPTH_TEST);
 		glClearColor(1, 1, 1, 1);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
-
 		
 		glm::mat4 modelMatrix(1.0f);
 		glm::mat4 viewMatrix(1.0f);
@@ -278,25 +162,13 @@ int main()
 		glm::mat4 u_mvp = projMatrix * viewMatrix * modelMatrix;
 
 		glViewport(0, 0, SCRN_WIDTH, SCRN_HEIGHT);
-		cubeShader.use();
-		cubeShader.setInt("shadowMap", 2);
-		cubeShader.setUniformMatrix("model", modelMatrix);
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, depthMap);
-		platform.transMatrix(platformShader, cameraPos, cameraFront, cameraUp);
-		platform.Draw(platformShader);
 
-		cubeShader.use();
-		cubeShader.setUniformMatrix("u_mvp", u_mvp);
-		cubeShader.setVec3(*"lightPos", lightPos);
-		cubeShader.setUniformMatrix("model", modelMatrix);
-		cubeShader.setVec3(*"viewPos", cameraPos);
-		cubeShader.setInt("shadowMap", 2);
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, depthMap);
-		glBindVertexArray(VAO);
-		cube.Draw(cubeShader);
-		glBindVertexArray(0);
+
+	
+
+		modelShader.use();
+		modelShader.setUniformMatrix("u_mvp", u_mvp);
+		model.Draw(modelShader);
 
 		
 
