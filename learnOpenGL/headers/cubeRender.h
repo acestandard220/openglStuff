@@ -96,7 +96,7 @@ public:
 		}
 		else
 		{
-			std::cout << "Failed to load texture" << std::endl;
+			std::cout << "Failed to load texture - NORMAL at "<< texDetails.normal_path << std::endl;
 		}
 		stbi_image_free(normal_data);
 

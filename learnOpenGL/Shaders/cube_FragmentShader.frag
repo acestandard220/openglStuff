@@ -53,7 +53,7 @@ void main()
 
 	vec3 colour = texture(diffuseTexture, fs_in.textCoord).rgb;
 	vec3 result = (ambient +(1.0-shad)* diffuse +specular)* colour;
-	FragColor = vec4(result,1.0);
+	FragColor = vec4(2.35,0.654,0.1234,1.0);
 
 	//Texture with normal as diffuse
 	//FragColor = texture(normalTexture,fs_in.textCoord);

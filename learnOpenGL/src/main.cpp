@@ -247,7 +247,7 @@ int main()
 		lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
 		lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
 		lightSpaceMatrix = lightProjection * lightView;
-		glViewport(0, 0, 1024, 1024);
+		glViewport(0, 0, SCRN_WIDTH,SCRN_HEIGHT);
 
 		depthShader.use();
 		depthShader.setUniformMatrix("lightSpaceMatrx", lightSpaceMatrix);
@@ -274,10 +274,10 @@ int main()
 		//modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, -2.0f, -30.0f));
 		modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0));
 		viewMatrix = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-		projMatrix = glm::perspective(glm::radians(45.0f), SCRN_WIDTH / SCRN_HEIGHT + 0.0f, 0.1f, 1000.0f);
+		projMatrix = glm::perspective(glm::radians(45.0f), (float)SCRN_WIDTH / SCRN_HEIGHT + 0.0f, 0.1f, 1000.0f);
 		glm::mat4 u_mvp = projMatrix * viewMatrix * modelMatrix;
 
-		glViewport(0, 0, 1024, 1024);
+		glViewport(0, 0, SCRN_WIDTH, SCRN_HEIGHT);
 		cubeShader.use();
 		cubeShader.setInt("shadowMap", 2);
 		cubeShader.setUniformMatrix("model", modelMatrix);
@@ -342,6 +342,9 @@ void processInput(GLFWwindow* window)
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
+	SCRN_HEIGHT = height;
+	SCRN_WIDTH = width;
+
 	glViewport(0, 0, width, height);
 }
 
