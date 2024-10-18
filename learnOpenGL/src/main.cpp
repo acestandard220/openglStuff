@@ -133,25 +133,38 @@ int main()
 	processInput(window);
 
 	
-	unsigned int framebufer;
-	
+	unsigned int framebuffer;
+	glGenFramebuffers(1, &framebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+	unsigned int depthMap;
+	glGenTextures(1, &depthMap);
+	glBindTexture(GL_TEXTURE_2D, depthMap);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 800, 800,0, GL_DEPTH_COMPONENT,GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthMap, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);	
 
 	
 	quadShader.use();
 	quadShader.setInt("screenTexture", 0);
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	//glm::vec3 lightPos(-2.0f, 2.0f, -1.0f);
-	glm::vec3 lightPos = glm::vec3(50, 200, 20);
+	glm::vec3 lightPos = glm::vec3(50, 500, 20);
 	
 
 	while (!glfwWindowShouldClose(window))
 	{
 		processInput(window);
 		
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glEnable(GL_DEPTH_TEST);
-		glClearColor(0, 0, 0, 1);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
 		
 		glm::mat4 modelMatrix(1.0f);
 		glm::mat4 viewMatrix(1.0f);
@@ -165,7 +178,14 @@ int main()
 
 		glViewport(0, 0, SCRN_WIDTH, SCRN_HEIGHT);
 
+		glm::mat4 lightProjection, lightView;
+		glm::mat4 lightSpaceMatrix;
+		float near_plane = 1.0f, far_plane = 7.5f;
+		lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+		lightView = glm::lookAt(lightPos, cameraFront, glm::vec3(0.0, 1.0, 0.0));
+		lightSpaceMatrix = lightProjection * lightView;
 
+		/*
 		cubeShader.use();
 		modelMatrix = glm::translate(modelMatrix, lightPos);
 		modelMatrix = glm::scale(modelMatrix, glm::vec3(3.0));
@@ -175,8 +195,73 @@ int main()
 		Light.SetMVP(cubeShader,modelMatrix, cameraPos, cameraFront, cameraUp);
 
 		Light.Draw(cubeShader);
+		*/
+
+		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+		glEnable(GL_DEPTH_TEST);
+		glClearColor(0, 0, 0, 1);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		depthShader.use();
+		modelMatrix = glm::mat4(1.0);
+		depthShader.setUniformMatrix("model", modelMatrix);
+		depthShader.setUniformMatrix("u_mvp", u_mvp);
+		depthShader.setVec3(*"viewPos", cameraPos);
+
+		//float cutoff = glm::cos(glm::radians(12.5));
+		//float outer_cutoff = glm::cos(glm::radians(17.5));
+
+		//int camPos_loc1 = modelShader.getUniformLocation("camPos");
+		//int viewPos_loc1 = modelShader.getUniformLocation("viewPos");
+		//int spotDir_loc1 = modelShader.getUniformLocation("spotDir");
+		//int cutoff_loc1 = modelShader.getUniformLocation("cutoff");
+		//int o_cutoff_loc1 = modelShader.getUniformLocation("outer_cutoff");
+
+
+		//glUniform3fv(camPos_loc1, 1, &cameraPos[0]);
+		//glUniform3fv(viewPos_loc1, 1, &cameraPos[0]);
+		//glUniform3fv(spotDir_loc1, 1, &cameraFront[0]);
+		//glUniform1f(cutoff_loc1, cutoff);
+		//glUniform1f(o_cutoff_loc1, outer_cutoff);
+
+		depthShader.setUniformMatrix("lightSpaceMatrix", lightSpaceMatrix);
+		
+		Sponza.Draw(modelShader);
 
 		modelShader.use();
+		
+		modelMatrix = glm::translate(modelMatrix, glm::vec3(20,300,20));
+		//modelShader.setVec3(*"lightPos", lightPos);
+		modelMatrix = glm::scale(modelMatrix, glm::vec3(10.0));
+		modelMatrix = glm::rotate(modelMatrix, glm::radians((float)glfwGetTime()*8), glm::vec3(1.0, 1.0, 1.0));
+		depthShader.setUniformMatrix("model", modelMatrix);
+		//modelShader.setUniformMatrix("u_mvp", u_mvp);
+
+		//int spotDir_loc2 = modelShader.getUniformLocation("spotDir");
+		//int camPos_loc2 = modelShader.getUniformLocation("camPos");
+		//int viewPos_loc2 = modelShader.getUniformLocation("viewPos");
+		//int cutoff_loc2 = modelShader.getUniformLocation("cutoff");
+		//int o_cutoff_loc2 = modelShader.getUniformLocation("outer_cutoff");
+		//
+		//glUniform3fv(camPos_loc2, 1, &cameraPos[0]);
+		//glUniform3fv(viewPos_loc2, 1, &cameraPos[0]);
+		//glUniform3fv(cutoff_loc2, 1, &cameraFront[0]);
+		//glUniform1f(cutoff_loc2, cutoff);
+		//glUniform1f(o_cutoff_loc2, outer_cutoff);
+		depthShader.setUniformMatrix("lightSpaceMatrix", lightSpaceMatrix);
+		
+		Cux.Draw(modelShader);
+		
+		/////////////////////////////////////88888888888888888888888888888888888888888////////////////////////////////////////////////////
+
+		
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glEnable(GL_DEPTH_TEST);
+		glClearColor(0, 0, 0, 1);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		modelShader.use();
+		modelShader.setInt("shadowMap", 14);
 		modelMatrix = glm::mat4(1.0);
 		modelShader.setUniformMatrix("model", modelMatrix);
 		modelShader.setUniformMatrix("u_mvp", u_mvp);
@@ -197,17 +282,21 @@ int main()
 		glUniform3fv(spotDir_loc1, 1, &cameraFront[0]);
 		glUniform1f(cutoff_loc1, cutoff);
 		glUniform1f(o_cutoff_loc1, outer_cutoff);
-
+		glActiveTexture(GL_TEXTURE14);
+		glBindTexture(GL_TEXTURE_2D, depthMap);
+		modelShader.setUniformMatrix("lightSpaceMatrix", lightSpaceMatrix);
 		Sponza.Draw(modelShader);
 
 		modelShader.use();
-		
-		modelMatrix = glm::translate(modelMatrix, glm::vec3(20,300,20));
+		modelShader.setInt("shadowMap", 14);
+		modelMatrix = glm::translate(modelMatrix, glm::vec3(20, 300, 20));
 		modelShader.setVec3(*"lightPos", lightPos);
 		modelMatrix = glm::scale(modelMatrix, glm::vec3(10.0));
-		modelMatrix = glm::rotate(modelMatrix, glm::radians((float)glfwGetTime()*8), glm::vec3(1.0, 1.0, 1.0));
+		modelMatrix = glm::rotate(modelMatrix, glm::radians((float)glfwGetTime() * 8), glm::vec3(1.0, 1.0, 1.0));
 		modelShader.setUniformMatrix("model", modelMatrix);
 		modelShader.setUniformMatrix("u_mvp", u_mvp);
+		glActiveTexture(GL_TEXTURE14);
+		glBindTexture(GL_TEXTURE_2D, depthMap);
 
 		int camPos_loc2 = modelShader.getUniformLocation("camPos");
 		int viewPos_loc2 = modelShader.getUniformLocation("viewPos");
@@ -221,9 +310,9 @@ int main()
 		glUniform1f(cutoff_loc2, cutoff);
 		glUniform1f(o_cutoff_loc2, outer_cutoff);
 
-		
+		modelShader.setUniformMatrix("lightSpaceMatrix", lightSpaceMatrix);
 		Cux.Draw(modelShader);
-		
+
 		
 
 
