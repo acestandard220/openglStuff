@@ -102,6 +102,7 @@ private:
 
         if (!mesh->HasNormals())
             std::cout << "This model deos not contain normals\n";
+        
         // walk through each of the mesh's vertices
         for (unsigned int i = 0; i < mesh->mNumVertices; i++)
         {

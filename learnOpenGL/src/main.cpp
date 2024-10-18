@@ -121,8 +121,8 @@ int main()
 
 
 	
-	Model model("C:/Users/User/Downloads/halloween_pumpkin_tim_burton_style/hallowen_pum.obj");
-
+	//Model model("C:/Users/User/Downloads/halloween_pumpkin_tim_burton_style/hallowen_pum.obj");
+	Model model("C:/Users/User/Desktop/Sponza-master/Sponza-master/sponza.obj");
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_MULTISAMPLE);
 
@@ -156,10 +156,10 @@ int main()
 		glm::mat4 viewMatrix(1.0f);
 		glm::mat4 projMatrix(1.0f);
 		//modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, -2.0f, -30.0f));
-		modelMatrix = glm::scale(modelMatrix, glm::vec3(2.0));
-		modelMatrix = glm::rotate(modelMatrix, glm::radians((float)glfwGetTime()*8), glm::vec3(1.0, 1.0, 1.0));
+		//modelMatrix = glm::scale(modelMatrix, glm::vec3(2.0));
+		//modelMatrix = glm::rotate(modelMatrix, glm::radians((float)glfwGetTime()*8), glm::vec3(1.0, 1.0, 1.0));
 		viewMatrix = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-		projMatrix = glm::perspective(glm::radians(45.0f), (float)SCRN_WIDTH / SCRN_HEIGHT + 0.0f, 0.1f, 1000.0f);
+		projMatrix = glm::perspective(glm::radians(45.0f), (float)SCRN_WIDTH / SCRN_HEIGHT + 0.0f, 0.1f, 1000000.0f);
 		glm::mat4 u_mvp = projMatrix * viewMatrix * modelMatrix;
 
 		glViewport(0, 0, SCRN_WIDTH, SCRN_HEIGHT);
@@ -204,7 +204,7 @@ int main()
 
 void processInput(GLFWwindow* window)
 {
-	const float cameraSpeed = 0.005f;
+	const float cameraSpeed = 0.5f;
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		cameraPos += cameraSpeed * cameraFront;
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
