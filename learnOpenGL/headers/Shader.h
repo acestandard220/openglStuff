@@ -121,9 +121,9 @@ public:
 	{
 		glUniformMatrix4fv(getUniformLocation(var), 1, GL_FALSE, glm::value_ptr(value));
 	}
-	void setVec3(const char var, const glm::vec3 value)
+	void setVec3(const char var, const glm::vec3 &value)
 	{
-		glUniform3f(getUniformLocation(&var), value.x, value.y, value.z);
+		glUniform3fv(getUniformLocation(&var),1,&value[0]);
 	}
 	void setFloat(const char var, int* value)
 	{

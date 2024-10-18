@@ -18,5 +18,5 @@ void main()
     Normal = mat3(transpose(inverse(model))) * aNormal;  
     FragPos = vec3(model*vec4(aPos,1.0f));	
     TexCoords = aTexCoords;    
-    gl_Position = u_mvp * vec4(aPos, 1.0);
+    gl_Position = u_mvp * model * vec4(aPos, 1.0);
 }

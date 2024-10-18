@@ -121,8 +121,9 @@ int main()
 
 
 	
-	//Model model("C:/Users/User/Downloads/halloween_pumpkin_tim_burton_style/hallowen_pum.obj");
-	Model model("C:/Users/User/Desktop/Sponza-master/Sponza-master/sponza.obj");
+	Model Cux("C:/Users/User/Downloads/halloween_pumpkin_tim_burton_style/hallowen_pum.obj");
+	Model Sponza("C:/Users/User/Desktop/Sponza-master/Sponza-master/sponza.obj");
+	Cube  Light;
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_MULTISAMPLE);
 
@@ -140,7 +141,7 @@ int main()
 	quadShader.setInt("screenTexture", 0);
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	//glm::vec3 lightPos(-2.0f, 2.0f, -1.0f);
-	glm::vec3 lightPos = glm::vec3(1.2f, 1.0f, 2.0f);
+	glm::vec3 lightPos = glm::vec3(50, 200, 20);
 	
 
 	while (!glfwWindowShouldClose(window))
@@ -159,20 +160,42 @@ int main()
 		//modelMatrix = glm::scale(modelMatrix, glm::vec3(2.0));
 		//modelMatrix = glm::rotate(modelMatrix, glm::radians((float)glfwGetTime()*8), glm::vec3(1.0, 1.0, 1.0));
 		viewMatrix = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-		projMatrix = glm::perspective(glm::radians(45.0f), (float)SCRN_WIDTH / SCRN_HEIGHT + 0.0f, 0.1f, 1000000.0f);
-		glm::mat4 u_mvp = projMatrix * viewMatrix * modelMatrix;
+		projMatrix = glm::perspective(glm::radians(45.0f), (float)SCRN_WIDTH / SCRN_HEIGHT + 0.0f, 0.1f ,5000.0f);
+		glm::mat4 u_mvp = projMatrix * viewMatrix ;
 
 		glViewport(0, 0, SCRN_WIDTH, SCRN_HEIGHT);
 
 
-	
+		cubeShader.use();
+		modelMatrix = glm::translate(modelMatrix, lightPos);
+		modelMatrix = glm::scale(modelMatrix, glm::vec3(3.0));
+		cubeShader.setUniformMatrix("model", modelMatrix);
+		cubeShader.setUniformMatrix("u_mvp", u_mvp);
+		cubeShader.setVec3(*"viewPos", cameraPos);
+		Light.SetMVP(cubeShader,modelMatrix, cameraPos, cameraFront, cameraUp);
+
+		Light.Draw(cubeShader);
 
 		modelShader.use();
+		modelMatrix = glm::mat4(1.0);
 		modelShader.setUniformMatrix("model", modelMatrix);
 		modelShader.setUniformMatrix("u_mvp", u_mvp);
 		modelShader.setVec3(*"viewPos", cameraPos);
-		model.Draw(modelShader);
+		modelShader.setVec3(*"camPos", cameraPos);
+		Sponza.Draw(modelShader);
 
+		modelShader.use();
+		
+		modelMatrix = glm::translate(modelMatrix, glm::vec3(20,300,20));
+		modelShader.setVec3(*"lightPos", lightPos);
+		modelMatrix = glm::scale(modelMatrix, glm::vec3(10.0));
+		modelMatrix = glm::rotate(modelMatrix, glm::radians((float)glfwGetTime()*8), glm::vec3(1.0, 1.0, 1.0));
+		modelShader.setUniformMatrix("model", modelMatrix);
+		modelShader.setUniformMatrix("u_mvp", u_mvp);
+		modelShader.setVec3(*"camPos", cameraPos);
+		modelShader.setVec3(*"viewPos", cameraPos);
+		Cux.Draw(modelShader);
+		
 		
 
 
