@@ -133,7 +133,7 @@ int main()
 	processInput(window);
 
 	
-
+	unsigned int framebufer;
 	
 
 	
@@ -181,7 +181,23 @@ int main()
 		modelShader.setUniformMatrix("model", modelMatrix);
 		modelShader.setUniformMatrix("u_mvp", u_mvp);
 		modelShader.setVec3(*"viewPos", cameraPos);
-		modelShader.setVec3(*"camPos", cameraPos);
+
+		float cutoff = glm::cos(glm::radians(12.5));
+		float outer_cutoff = glm::cos(glm::radians(17.5));
+
+		int camPos_loc1 = modelShader.getUniformLocation("camPos");
+		int viewPos_loc1 = modelShader.getUniformLocation("viewPos");
+		int spotDir_loc1 = modelShader.getUniformLocation("spotDir");
+		int cutoff_loc1 = modelShader.getUniformLocation("cutoff");
+		int o_cutoff_loc1 = modelShader.getUniformLocation("outer_cutoff");
+
+
+		glUniform3fv(camPos_loc1, 1, &cameraPos[0]);
+		glUniform3fv(viewPos_loc1, 1, &cameraPos[0]);
+		glUniform3fv(spotDir_loc1, 1, &cameraFront[0]);
+		glUniform1f(cutoff_loc1, cutoff);
+		glUniform1f(o_cutoff_loc1, outer_cutoff);
+
 		Sponza.Draw(modelShader);
 
 		modelShader.use();
@@ -192,8 +208,20 @@ int main()
 		modelMatrix = glm::rotate(modelMatrix, glm::radians((float)glfwGetTime()*8), glm::vec3(1.0, 1.0, 1.0));
 		modelShader.setUniformMatrix("model", modelMatrix);
 		modelShader.setUniformMatrix("u_mvp", u_mvp);
-		modelShader.setVec3(*"camPos", cameraPos);
-		modelShader.setVec3(*"viewPos", cameraPos);
+
+		int camPos_loc2 = modelShader.getUniformLocation("camPos");
+		int viewPos_loc2 = modelShader.getUniformLocation("viewPos");
+		int spotDir_loc2 = modelShader.getUniformLocation("spotDir");
+		int cutoff_loc2 = modelShader.getUniformLocation("cutoff");
+		int o_cutoff_loc2 = modelShader.getUniformLocation("outer_cutoff");
+
+		glUniform3fv(camPos_loc2, 1, &cameraPos[0]);
+		glUniform3fv(viewPos_loc2, 1, &cameraPos[0]);
+		glUniform3fv(cutoff_loc2, 1, &cameraFront[0]);
+		glUniform1f(cutoff_loc2, cutoff);
+		glUniform1f(o_cutoff_loc2, outer_cutoff);
+
+		
 		Cux.Draw(modelShader);
 		
 		
