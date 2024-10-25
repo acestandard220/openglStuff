@@ -12,5 +12,5 @@ uniform mat4 model;
 
 void main()
 {
-	gl_Position =  u_mvp*model * vec4(aPos,1.0f);
+	gl_Position =  u_mvp * model * vec4(aPos,1.0f);
 }

@@ -7,12 +7,15 @@
 #include <stb_image.h>
 #include <headers/model.h>
 #include <headers/paths.h>
+#include <headers/framebufferobject.h>
 #include <vector>
 //#include "headers/transfoformations.h"
+#include <imGUI/imgui.h>
+#include <imgui_impl_glfw_gl3.h>
 #include <string>
 //#include "headers/pointRenderer.h"
-int SCRN_HEIGHT = 800;
-int SCRN_WIDTH = 800;
+int SCRN_HEIGHT = 720;
+int SCRN_WIDTH = 1280;
 
 /// <TODO>
 /// 
@@ -34,8 +37,8 @@ bool paneFlag = false;
 
 float sensitivity = 0.0f;
 
-float lastX = 1000 / 2.0f;
-float lastY = 800 / 2.0f;
+float lastX = SCRN_WIDTH / 2.0f;
+float lastY = SCRN_HEIGHT / 2.0f;
 bool firstMouse = true;
 
 float deltaTime = 0.0f;
@@ -47,12 +50,13 @@ glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
 float yaw = -90.0f;
 float pitch = 0.0f;
-
+float cameraSpeed = 0.5f;
 
 void processInput(GLFWwindow* window);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void mouse_button_callback(GLFWwindow*, int, int, int);
+void joystick_callback(int jid, int _event);
 
 std::vector<std::string> faces = {
 	"P:/Projects/VS/learnOpenGL/learnOpenGL/Textures/skybox/skybox/right.jpg",
@@ -95,6 +99,39 @@ unsigned int loadCubemap(std::vector<std::string>faces)
 	return textureID;
 }
 
+const float* axis;
+glm::vec3 sunPos = glm::vec3(50.0f, 400.0f, 20.0f);
+glm::vec3 lightPos = glm::vec3(20.0f, 200.0f, 20.0f);
+glm::vec3 sunColor = glm::vec3(0.5f, 0.5, 0.2f);
+glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+
+
+glm::vec3 LIGHTPOSITIONS[3] = {
+	glm::vec3(0.0f, 250.0f, 0.0f),
+	glm::vec3(500.0f,250.0f,0.0f),
+	glm::vec3(-500.0f,250.0f,0.0f)
+};
+
+glm::vec3 LIGHTCOLOR[3] = {
+glm::vec3(1.0f, 0.0f, 0.0f),
+glm::vec3(0.0f,1.0f,0.0f),
+glm::vec3(0.0f,0.0f,1.0f)
+};
+glm::vec3 scalek = glm::vec3(1.0, 1.0, 1.0);
+
+bool mod_window = true;
+bool isOn = false;
+float on;
+
+struct ATTENTUATION_PROPS {
+	float constant;
+	float linear ;
+	float quadratic;
+};
+void Render(Shader modelShader, Model& model, ATTENTUATION_PROPS props);
+
+void RenderBulb(Shader& modelShader, Model& model, ATTENTUATION_PROPS props);
+
 
 int main()
 {
@@ -102,11 +139,25 @@ int main()
 		return -1;
 
 	glfwWindowHint(GL_SAMPLES, 4);
-	GLFWwindow* window = glfwCreateWindow(SCRN_WIDTH, SCRN_HEIGHT, "amish", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(SCRN_WIDTH, SCRN_HEIGHT, "LEARNOPENGL", NULL, NULL);
 	glfwMakeContextCurrent(window);
 
 	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glewInit();
+
+
+
+
+
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+	int count;
+	
+
+	ImGui_ImplGlfwGL3_Init(window, true);
 
 	Shader cubeShader(CUBE_VERTEX_SHADER, CUBE_FRAGMENT_SHADER);
 	//Shader skyboxShader(SKYBOX_VERTEX_SHADER, SKYBOX_FRAGMENT_SHADER);
@@ -118,118 +169,94 @@ int main()
 	//Shader pointShader(POINT_VERTEX_SHADER,POINT_FRAGMENT_SHADER,POINT_GEOMETRY_SHADER);
 
 	//Skybox skybox(loadCubemap(faces));
-
-
+	Framebuffer FBO(SCRN_WIDTH,SCRN_HEIGHT);
+	FBO.ColorAttach(GL_RGB, GL_RGB, GL_UNSIGNED_INT_24_8);
+	FBO.DepthAttach();
+	FBO.Check();
+	FBO.Bind();
 	
-	Model Cux("C:/Users/User/Downloads/halloween_pumpkin_tim_burton_style/hallowen_pum.obj");
+	
 	Model Sponza("C:/Users/User/Desktop/Sponza-master/Sponza-master/sponza.obj");
 	Cube  Light;
+	Model Bulb("C:/Users/User/Downloads/Bulb.obj");
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_MULTISAMPLE);
+	glEnable(GL_DEPTH_CLAMP); 
 
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetMouseButtonCallback(window, mouse_button_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetJoystickCallback(joystick_callback);
 	processInput(window);
 
 	
+	bool show_demo_window = true;
+	bool show_another_window = true;
+	
 	unsigned int framebufer;
 	
-
+	
 	
 	quadShader.use();
 	quadShader.setInt("screenTexture", 0);
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	//glm::vec3 lightPos(-2.0f, 2.0f, -1.0f);
-	glm::vec3 lightPos = glm::vec3(50, 200, 20);
-	
 
+
+	ATTENTUATION_PROPS attenprops;
+	attenprops.constant = 1.0f;
+	attenprops.linear = 0.0001f;
+	attenprops.quadratic = 0.00001f;
+
+	int jid = 0;
 	while (!glfwWindowShouldClose(window))
 	{
 		processInput(window);
-		
+		ImGui_ImplGlfwGL3_NewFrame();
+	
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glEnable(GL_DEPTH_TEST);
-		glClearColor(0, 0, 0, 1);
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
-		glm::mat4 modelMatrix(1.0f);
-		glm::mat4 viewMatrix(1.0f);
-		glm::mat4 projMatrix(1.0f);
-		//modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, -2.0f, -30.0f));
-		//modelMatrix = glm::scale(modelMatrix, glm::vec3(2.0));
-		//modelMatrix = glm::rotate(modelMatrix, glm::radians((float)glfwGetTime()*8), glm::vec3(1.0, 1.0, 1.0));
-		viewMatrix = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-		projMatrix = glm::perspective(glm::radians(45.0f), (float)SCRN_WIDTH / SCRN_HEIGHT + 0.0f, 0.1f ,5000.0f);
-		glm::mat4 u_mvp = projMatrix * viewMatrix ;
-
+	
 		glViewport(0, 0, SCRN_WIDTH, SCRN_HEIGHT);
-
-
-		cubeShader.use();
-		modelMatrix = glm::translate(modelMatrix, lightPos);
-		modelMatrix = glm::scale(modelMatrix, glm::vec3(3.0));
-		cubeShader.setUniformMatrix("model", modelMatrix);
-		cubeShader.setUniformMatrix("u_mvp", u_mvp);
-		cubeShader.setVec3(*"viewPos", cameraPos);
-		Light.SetMVP(cubeShader,modelMatrix, cameraPos, cameraFront, cameraUp);
-
-		Light.Draw(cubeShader);
-
-		modelShader.use();
-		modelMatrix = glm::mat4(1.0);
-		modelShader.setUniformMatrix("model", modelMatrix);
-		modelShader.setUniformMatrix("u_mvp", u_mvp);
-		modelShader.setVec3(*"viewPos", cameraPos);
-
-		float cutoff = glm::cos(glm::radians(12.5));
-		float outer_cutoff = glm::cos(glm::radians(17.5));
-
-		int camPos_loc1 = modelShader.getUniformLocation("camPos");
-		int viewPos_loc1 = modelShader.getUniformLocation("viewPos");
-		int spotDir_loc1 = modelShader.getUniformLocation("spotDir");
-		int cutoff_loc1 = modelShader.getUniformLocation("cutoff");
-		int o_cutoff_loc1 = modelShader.getUniformLocation("outer_cutoff");
-
-
-		glUniform3fv(camPos_loc1, 1, &cameraPos[0]);
-		glUniform3fv(viewPos_loc1, 1, &cameraPos[0]);
-		glUniform3fv(spotDir_loc1, 1, &cameraFront[0]);
-		glUniform1f(cutoff_loc1, cutoff);
-		glUniform1f(o_cutoff_loc1, outer_cutoff);
-
-		Sponza.Draw(modelShader);
-
-		modelShader.use();
 		
-		modelMatrix = glm::translate(modelMatrix, glm::vec3(20,300,20));
-		modelShader.setVec3(*"lightPos", lightPos);
-		modelMatrix = glm::scale(modelMatrix, glm::vec3(10.0));
-		modelMatrix = glm::rotate(modelMatrix, glm::radians((float)glfwGetTime()*8), glm::vec3(1.0, 1.0, 1.0));
-		modelShader.setUniformMatrix("model", modelMatrix);
-		modelShader.setUniformMatrix("u_mvp", u_mvp);
+		if (show_demo_window)
+		{
+			ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiCond_FirstUseEver);
+			ImGui::ShowDemoWindow(&show_demo_window);
+		}
 
-		int camPos_loc2 = modelShader.getUniformLocation("camPos");
-		int viewPos_loc2 = modelShader.getUniformLocation("viewPos");
-		int spotDir_loc2 = modelShader.getUniformLocation("spotDir");
-		int cutoff_loc2 = modelShader.getUniformLocation("cutoff");
-		int o_cutoff_loc2 = modelShader.getUniformLocation("outer_cutoff");
+		{
+			static float fl = 0.0f;
+			static int counter = 0;
+			ImGui::Text("Editor");
+			ImGui::InputFloat3("Directional Light Colour", &sunColor[0]);
+			ImGui::InputFloat3("Directional light Position",&sunPos[0]);
+			ImGui::InputFloat3("Bulb Scale", &scalek[0]);
+			ImGui::Checkbox("Demo Window", &show_demo_window);
 
-		glUniform3fv(camPos_loc2, 1, &cameraPos[0]);
-		glUniform3fv(viewPos_loc2, 1, &cameraPos[0]);
-		glUniform3fv(cutoff_loc2, 1, &cameraFront[0]);
-		glUniform1f(cutoff_loc2, cutoff);
-		glUniform1f(o_cutoff_loc2, outer_cutoff);
+			if (ImGui::Button("Button"))
+				counter++;
+			ImGui::SameLine();
+			ImGui::Text("counter = %d", counter);
 
-		
-		Cux.Draw(modelShader);
-		
-		
+			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		}
+	
+		{
+			ImGui::Begin("FLUX CUX DeCartes T-WORM",&mod_window);
+			ImGui::Text("This is a modification window");
+			ImGui::Text("These are some stats: %d.f", ImGui::GetFrameCount());
+			ImGui::Text(" This is the clipboard text: %s",ImGui::GetClipboardText());
+			ImGui::SliderFloat("Camera Speed ", &cameraSpeed, 0.5f, 10.0f);
+			
+			ImGui::Checkbox("Directional Light", &isOn);
+			ImGui::End();
+		}
 
-
-
-
-
+		Render(modelShader, Sponza,attenprops);
+		RenderBulb(modelShader, Bulb, attenprops);
 
 		/*
 		quadShader.use(); 
@@ -245,17 +272,165 @@ int main()
 		
 		//*/
 
+		ImGui::Render();
+		ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
 		glfwSwapBuffers(window);
 		//WriteToPPM(window);
 		glfwPollEvents();
 	}
+	ImGui_ImplGlfwGL3_Shutdown();
+	ImGui::DestroyContext();
 	glfwTerminate();
 	return 0;
 }
 
-void processInput(GLFWwindow* window)
+//Renders
+void Render(Shader modelShader,Model& model,ATTENTUATION_PROPS props)
 {
-	const float cameraSpeed = 0.5f;
+	glm::mat4 modelMatrix(1.0f);
+	glm::mat4 viewMatrix(1.0f);
+	glm::mat4 projMatrix(1.0f);
+	//modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, -2.0f, -30.0f));
+	modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0f));
+	//modelMatrix = glm::rotate(modelMatrix, glm::radians((float)glfwGetTime()*8), glm::vec3(1.0, 1.0, 1.0));
+	viewMatrix = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+	projMatrix = glm::perspective(glm::radians(45.0f), (float)SCRN_WIDTH / SCRN_HEIGHT + 0.0f, 0.1f, 3000.0f);
+	glm::mat4 u_mvp = projMatrix * viewMatrix;
+
+	modelShader.use();
+	modelMatrix = glm::mat4(1.0);
+	modelShader.setUniformMatrix("model", modelMatrix);
+	modelShader.setUniformMatrix("u_mvp", u_mvp);
+	on = isOn ? 1.0f : 0.0f;
+	modelShader.setInt("on", on);
+	modelShader.setVec3(*"viewPos", cameraPos);
+
+	float cutoff = glm::cos(glm::radians(12.5f));
+	float outer_cutoff = glm::cos(glm::radians(17.5f));
+
+	int viewPos_loc1 = modelShader.getUniformLocation("viewPos");
+	int spotDir_loc1 = modelShader.getUniformLocation("spotDir");
+	int cutoff_loc1 = modelShader.getUniformLocation("cutoff");
+	int o_cutoff_loc1 = modelShader.getUniformLocation("outer_cutoff");
+	int lightPos_loc1 = modelShader.getUniformLocation("lightPos");
+	int lightDir_loc1 = modelShader.getUniformLocation("d_light.lightDirection");
+	int lightColor_loc1 = modelShader.getUniformLocation("d_light.lightColor");
+	int lightConst_loc1 = modelShader.getUniformLocation("p_light[1].constant");
+	int lightLinear_loc1 = modelShader.getUniformLocation("p_light[1].linear");
+	int lightQuadratic_loc1 = modelShader.getUniformLocation("p_light[1].quadratic");
+	int p_lightColor_loc1 = modelShader.getUniformLocation("p_light[1].lightColor");
+	int p_lightPosition_loc1 = modelShader.getUniformLocation("p_light[1].lightPosition");
+	int lightConst_loc1_2 = modelShader.getUniformLocation("p_light[2].constant");
+	int lightLinear_loc1_2 = modelShader.getUniformLocation("p_light[2].linear");
+	int lightQuadratic_loc1_2 = modelShader.getUniformLocation("p_light[2].quadratic");
+	int p_lightColor_loc1_2 = modelShader.getUniformLocation("p_light[2].lightColor");
+	int p_lightPosition_loc1_2 = modelShader.getUniformLocation("p_light[2].lightPosition");
+	int lightConst_loc1_0 = modelShader.getUniformLocation("p_light[0].constant");
+	int lightLinear_loc1_0 = modelShader.getUniformLocation("p_light[0].linear");
+	int lightQuadratic_loc1_0 = modelShader.getUniformLocation("p_light[0].quadratic");
+	int p_lightColor_loc1_0 = modelShader.getUniformLocation("p_light[0].lightColor");
+	int p_lightPosition_loc1_0 = modelShader.getUniformLocation("p_light[0].lightPosition");
+
+	glUniform1f(lightConst_loc1, props.constant);
+	glUniform1f(lightLinear_loc1, props.linear);
+	glUniform1f(lightQuadratic_loc1, props.quadratic);
+	glUniform3fv(p_lightPosition_loc1, 1, &LIGHTPOSITIONS[1][0]);
+	glUniform3fv(p_lightColor_loc1, 1, &LIGHTCOLOR[1][0]);
+	glUniform1f(lightConst_loc1_2, props.constant);
+	glUniform1f(lightLinear_loc1_2, props.linear);
+	glUniform1f(lightQuadratic_loc1_2, props.quadratic);
+	glUniform3fv(p_lightPosition_loc1_2, 1, &LIGHTPOSITIONS[2][0]);
+	glUniform3fv(p_lightColor_loc1_2, 1, &LIGHTCOLOR[2][0]);
+	glUniform3fv(viewPos_loc1, 1, &cameraPos[0]);
+	glUniform3fv(spotDir_loc1, 1, &cameraFront[0]);
+	glUniform1f(cutoff_loc1, cutoff);
+	glUniform1f(o_cutoff_loc1, outer_cutoff);
+	glUniform3fv(lightPos_loc1, 1, &lightPos[0]);
+	glUniform3fv(lightDir_loc1, 1, &sunPos[0]);
+	glUniform3fv(lightColor_loc1, 1, &sunColor[0]);
+	glUniform1f(lightConst_loc1_0, props.constant);
+	glUniform1f(lightLinear_loc1_0, props.linear);
+	glUniform1f(lightQuadratic_loc1_0, props.quadratic);
+	glUniform3fv(p_lightPosition_loc1_0, 1, &LIGHTPOSITIONS[0][0]);
+	glUniform3fv(p_lightColor_loc1_0, 1, &LIGHTCOLOR[0][0]);
+
+	model.Draw(modelShader);
+
+}
+
+void RenderBulb(Shader& modelShader,Model& model,ATTENTUATION_PROPS props)
+{
+	glm::mat4 modelMatrix(1.0f);
+	glm::mat4 viewMatrix(1.0f);
+	glm::mat4 projMatrix(1.0f);
+	modelMatrix = glm::translate(modelMatrix, sunPos);
+	modelMatrix = glm::scale(modelMatrix, scalek);
+	//modelMatrix = glm::rotate(modelMatrix, glm::radians((float)glfwGetTime()*8), glm::vec3(1.0, 1.0, 1.0));
+	viewMatrix = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+	projMatrix = glm::perspective(glm::radians(45.0f), (float)SCRN_WIDTH / SCRN_HEIGHT + 0.0f, 0.1f, 3000.0f);
+	glm::mat4 u_mvp = projMatrix * viewMatrix;
+
+	modelShader.use();
+	modelShader.setUniformMatrix("model", modelMatrix);
+	modelShader.setUniformMatrix("u_mvp", u_mvp);
+	on = isOn ? 1.0f : 0.0f;
+	modelShader.setInt("on", on);
+	modelShader.setVec3(*"viewPos", cameraPos);
+
+	float cutoff = glm::cos(glm::radians(12.5f));
+	float outer_cutoff = glm::cos(glm::radians(17.5f));
+
+	int viewPos_loc1 = modelShader.getUniformLocation("viewPos");
+	int spotDir_loc1 = modelShader.getUniformLocation("spotDir");
+	int cutoff_loc1 = modelShader.getUniformLocation("cutoff");
+	int o_cutoff_loc1 = modelShader.getUniformLocation("outer_cutoff");
+	int lightPos_loc1 = modelShader.getUniformLocation("lightPos");
+	int lightDir_loc1 = modelShader.getUniformLocation("d_light.lightDirection");
+	int lightColor_loc1 = modelShader.getUniformLocation("d_light.lightolor");
+	int lightConst_loc1 = modelShader.getUniformLocation("p_light[1].constant");
+	int lightLinear_loc1 = modelShader.getUniformLocation("p_light[1].linear");
+	int lightQuadratic_loc1 = modelShader.getUniformLocation("p_light[1].quadratic");
+	int p_lightColor_loc1 = modelShader.getUniformLocation("p_light[1].lightColor");
+	int p_lightPosition_loc1 = modelShader.getUniformLocation("p_light[1].lightPosition");
+	int lightConst_loc1_2 = modelShader.getUniformLocation("p_light[2].constant");
+	int lightLinear_loc1_2 = modelShader.getUniformLocation("p_light[2].linear");
+	int lightQuadratic_loc1_2 = modelShader.getUniformLocation("p_light[2].quadratic");
+	int p_lightColor_loc1_2 = modelShader.getUniformLocation("p_light[2].lightColor");
+	int p_lightPosition_loc1_2 = modelShader.getUniformLocation("p_light[2].lightPosition");
+	int lightConst_loc1_0 = modelShader.getUniformLocation("p_light[0].constant");
+	int lightLinear_loc1_0 = modelShader.getUniformLocation("p_light[0].linear");
+	int lightQuadratic_loc1_0 = modelShader.getUniformLocation("p_light[0].quadratic");
+	int p_lightColor_loc1_0 = modelShader.getUniformLocation("p_light[0].lightColor");
+	int p_lightPosition_loc1_0 = modelShader.getUniformLocation("p_light[0].lightPosition");
+
+	glUniform1f(lightConst_loc1, props.constant);
+	glUniform1f(lightLinear_loc1, props.linear);
+	glUniform1f(lightQuadratic_loc1, props.quadratic);
+	glUniform3fv(p_lightPosition_loc1, 1, &LIGHTPOSITIONS[1][0]);
+	glUniform3fv(p_lightColor_loc1, 1, &LIGHTCOLOR[1][0]);
+	glUniform1f(lightConst_loc1_2, props.constant);
+	glUniform1f(lightLinear_loc1_2, props.linear);
+	glUniform1f(lightQuadratic_loc1_2, props.quadratic);
+	glUniform3fv(p_lightPosition_loc1_2, 1, &LIGHTPOSITIONS[2][0]);
+	glUniform3fv(p_lightColor_loc1_2, 1, &LIGHTCOLOR[2][0]);
+	glUniform3fv(viewPos_loc1, 1, &cameraPos[0]);
+	glUniform3fv(spotDir_loc1, 1, &cameraFront[0]);
+	glUniform1f(cutoff_loc1, cutoff);
+	glUniform1f(o_cutoff_loc1, outer_cutoff);
+	glUniform3fv(lightPos_loc1, 1, &lightPos[0]);
+	glUniform3fv(lightDir_loc1, 1, &sunPos[0]);
+	glUniform3fv(lightColor_loc1, 1, &sunColor[0]);
+	glUniform1f(lightConst_loc1_0, props.constant);
+	glUniform1f(lightLinear_loc1_0, props.linear);
+	glUniform1f(lightQuadratic_loc1_0, props.quadratic);
+	glUniform3fv(p_lightPosition_loc1_0, 1, &LIGHTPOSITIONS[0][0]);
+	glUniform3fv(p_lightColor_loc1_0, 1, &LIGHTCOLOR[0][0]);
+
+	model.Draw(modelShader);
+}
+//Callbacks
+void processInput(GLFWwindow* window)
+{	
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		cameraPos += cameraSpeed * cameraFront;
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -278,12 +453,15 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
 	int state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
 	int stated = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT);
-
-	if (state == GLFW_PRESS)
+	if(!ImGui::GetIO().WantCaptureMouse || !ImGui::GetIO().WantCaptureKeyboard)
 	{
-		sensitivity = 0.1f;
+
+		if (state == GLFW_PRESS)
+		{
+			sensitivity = 0.1f;
+		}
+		if (stated) { sensitivity = 0.0f; }
 	}
-	if(stated) { sensitivity = 0.0f; }
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
@@ -317,4 +495,15 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 	cameraFront = glm::normalize(direction);
 
+}
+
+void joystick_callback(int jid, int _event)
+{
+	if (_event == GLFW_CONNECTED)
+		std::cout << "The joystick has been connected\n";
+	if (_event == GLFW_DISCONNECTED)
+		std::cout << "The joystick has been disconnected\n";
+
+	int buttonCount;
+	const unsigned char* buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &buttonCount);
 }

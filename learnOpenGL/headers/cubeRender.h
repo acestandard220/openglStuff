@@ -158,7 +158,7 @@ public:
 		//modelMatrix = glm::rotate(modelMatrix, glm::radians(45.0f * (float)glfwGetTime() * rotValue), glm::vec3(0.0f, 1.0f, 0.0f));
 		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
 		viewMatrix = glm::lookAt(camPos,camPos+camFront,camUp);
-		projMatrix = glm::perspective(glm::radians(45.0f), 500 / 300.0f, 0.1f, 1000.0f);
+		projMatrix = glm::perspective(glm::radians(45.0f), (float)800.0f / 800.0f, 0.1f, 3000.0f);
 
 		shader.use();
 		glm::mat4 u_mvp = projMatrix * viewMatrix * modelMatrix;
@@ -189,6 +189,7 @@ public:
 	{		
 		shader.use();
 		shader.setInt("diffuseTexture", 0);
+
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, diffTexture);
 		shader.setInt("normalTexture", 1);

@@ -104,7 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);GLEW_STATIC</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\learnOpenGL;$(SolutionDir)Deps\GLM\glm-master;$(SolutionDir)Deps/glfw-3.4.bin.WIN64\include;$(SolutionDir)learnOpenGL\imGUI;$(SolutionDir)Deps\glew-2.1.0\include;$(SolutionDir)Deps\Assimp\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\learnOpenGL;$(SolutionDir)Deps\GLM\glm-master;$(SolutionDir)Deps/glfw-3.4.bin.WIN64\include;$(SolutionDir)learnOpenGL\imGUI;$(SolutionDir)Deps\glew-2.1.0\include;$(SolutionDir)Deps\Assimp\include;P:\Projects\VS\learnOpenGL\learnOpenGL\imGUI</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -121,7 +121,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);GLEW_STATIC</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\learnOpenGL;$(SolutionDir)Deps\GLM\glm-master;$(SolutionDir)Deps/glfw-3.4.bin.WIN64\include;$(SolutionDir)learnOpenGL\imGUI;$(SolutionDir)Deps\glew-2.1.0\include;$(SolutionDir)Deps\Assimp\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\learnOpenGL;$(SolutionDir)Deps\GLM\glm-master;$(SolutionDir)Deps/glfw-3.4.bin.WIN64\include;$(SolutionDir)learnOpenGL\imGUI;$(SolutionDir)Deps\glew-2.1.0\include;$(SolutionDir)Deps\Assimp\include;P:\Projects\VS\learnOpenGL\learnOpenGL\imGUI</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -142,6 +142,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers\cubeRender.h" />
+    <ClInclude Include="headers\framebufferobject.h" />
     <ClInclude Include="headers\lightCaster.h" />
     <ClInclude Include="headers\mesh.h" />
     <ClInclude Include="headers\model.h" />
